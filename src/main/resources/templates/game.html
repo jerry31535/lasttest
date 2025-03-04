@@ -9,7 +9,8 @@
 <body>
     <div class="container">
         <h1>遊戲登入</h1>
-        
+
+        <!-- 登入表單 -->
         <div id="login-form">
             <h2>登入</h2>
             <input type="text" id="login-username" placeholder="帳號">
@@ -18,6 +19,7 @@
             <p>還沒有帳號？<a href="#" onclick="showRegisterForm()">註冊</a></p>
         </div>
 
+        <!-- 註冊表單 -->
         <div id="register-form" style="display: none;">
             <h2>註冊</h2>
             <input type="text" id="register-username" placeholder="帳號">
@@ -25,7 +27,7 @@
             <button onclick="register()">註冊</button>
             <p>已經有帳號？<a href="#" onclick="showLoginForm()">登入</a></p>
         </div>
-        
+
         <button onclick="location.href='/'" class="btn">返回首頁</button>
     </div>
 </body>

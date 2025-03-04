@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>遊戲大廳</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/game-lobby.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>遊戲大廳</h1>
+
+        <div id="user-info">
+            <p>歡迎，<span id="username-display">玩家</span>！</p>
+        </div>
+
+        <div id="game-room">
+            <h2>遊戲房間</h2>
+            <button onclick="createGameRoom()">創建遊戲房間</button>
+            <ul id="game-room-list">
+                <!-- 顯示現有的遊戲房間 -->
+            </ul>
+        </div>
+
+        <button onclick="location.href='/logout'" class="btn">登出</button>
+    </div>
+</body>
+</html>

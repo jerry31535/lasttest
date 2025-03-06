@@ -40,6 +40,7 @@ public class AuthController {
         if (success) {
             response.put("success", true);
             response.put("message", "登入成功！");
+            response.put("redirect","/game-lobby");
         } else {
             response.put("success", false);
             response.put("message", "帳號或密碼錯誤！");

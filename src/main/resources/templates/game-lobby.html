@@ -5,6 +5,14 @@
     <title>遊戲大廳</title>
     <link rel="stylesheet" href="/css/styles.css">
     <script src="/js/game-lobby.js" defer></script>
+    <style>
+        /* 自訂樣式，使按鈕上下排列 */
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -16,13 +24,14 @@
 
         <div id="game-room">
             <h2>遊戲房間</h2>
-            <button onclick="createGameRoom()">創建遊戲房間</button>
-            <ul id="game-room-list">
-                <!-- 顯示現有的遊戲房間 -->
-            </ul>
+            <div class="button-container">
+                <button onclick="joinGameRoom()">進入房間</button>
+                <button onclick="createGameRoom()">創建遊戲房間</button>
+            </div>
         </div>
 
         <button onclick="location.href='/logout'" class="btn">登出</button>
     </div>
 </body>
 </html>
+

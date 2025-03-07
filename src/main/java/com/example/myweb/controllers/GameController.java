@@ -8,6 +8,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/game")
+@SessionAttributes("username") // 用於處理會話層級的屬性
 public class GameController {
 
     @Autowired
@@ -25,4 +26,5 @@ public class GameController {
         String roomName = roomData.get("name");
         return gameService.createGameRoom(roomName);
     }
+    
 }

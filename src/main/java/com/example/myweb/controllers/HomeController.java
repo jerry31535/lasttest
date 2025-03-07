@@ -28,4 +28,8 @@ public class HomeController {
     public String gameLobby() {
         return "game-lobby"; // 這裡對應 src/main/resources/templates/game-lobby.html
     }
+    @GetMapping("/game-room")
+    public String gameRoom() {
+        return "game-room"; // 這裡對應 src/main/resources/templates/game-room.html
+    }
 }

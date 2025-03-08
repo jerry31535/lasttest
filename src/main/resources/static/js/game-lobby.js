@@ -13,12 +13,10 @@ function logout() {
     window.location.href = '/';
 }
 
-// 禁用進入房間和創建房間按鈕
-function joinGameRoom() {
-    // 顯示 alert 訊息
-    alert("進入房間功能尚未開啟");
-}
-
 function createGameRoom() {
     window.location.href = "/create-room";
+}
+
+function joinGameRoom() {
+    window.location.href = "/join-room";
 }

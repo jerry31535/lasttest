@@ -20,6 +20,5 @@ function joinGameRoom() {
 }
 
 function createGameRoom() {
-    // 顯示 alert 訊息
-    alert("創建遊戲房間功能尚未開啟");
+    window.location.href = "/create-room";
 }

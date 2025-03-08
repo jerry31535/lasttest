@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>創建遊戲房間</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/create-room.js" defer></script>
+    <style>
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        #password-container {
+            display: none; /* 預設隱藏密碼輸入框 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>創建遊戲房間</h1>
+
+        <div class="form-group">
+            <label for="room-name">房間名稱：</label>
+            <input type="text" id="room-name" placeholder="請輸入房間名稱">
+        </div>
+
+        <div class="form-group">
+            <label>房間類型：</label>
+            <select id="room-type">
+                <option value="public">公開</option>
+                <option value="private">私人</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="password-container">
+            <label for="room-password">房間密碼：</label>
+            <input type="password" id="room-password" placeholder="請輸入密碼">
+        </div>
+
+        <div class="form-group">
+            <label for="player-count">遊戲人數：</label>
+            <select id="player-count">
+                <!-- 產生 5~10 人的選項 -->
+                <script>
+                    for (let i = 5; i <= 10; i++) {
+                        document.write(`<option value="${i}">${i} 人</option>`);
+                    }
+                </script>
+            </select>
+        </div>
+
+        <button onclick="createRoom()">創建房間</button>
+        <button onclick="goBack()">返回</button>
+    </div>
+</body>
+</html>

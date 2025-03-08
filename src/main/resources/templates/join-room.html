@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>加入遊戲房間</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/join-room.js" defer></script>
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+        .box {
+            flex: 1;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            text-align: center;
+        }
+        #room-list {
+            min-height: 200px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .room-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .room-item:hover {
+            background-color: #f1f1f1;
+        }
+        .no-room {
+            text-align: center;
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+    <h1>開始戰鬥吧!</h1>
+    <div class="container">
+        <!-- 公開房間列表 -->
+        <div class="box">
+            <h2>歡迎加入公開房間!</h2>
+            <div id="room-list">
+                <p class="no-room">目前沒有遊戲房間QQ</p>
+            </div>
+        </div>
+
+        <!-- 私人房間輸入 -->
+        <div class="box">
+            <h2>與好友一同遊玩!</h2>
+            <p>請輸入房間密碼</p>
+            <input type="text" id="room-password" placeholder="請輸入密碼">
+            <button onclick="joinPrivateRoom()">加入</button>
+        </div>
+    </div>
+</body>
+</html>

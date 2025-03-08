@@ -32,5 +32,9 @@ public class HomeController {
     public String createRoom() {
         return "create-room"; // 對應 resources/templates/create-room.html
     }
+    @GetMapping("/join-room")  // 新增這一行
+    public String room() {
+        return "join-room"; // 對應 resources/templates/room.html
+    }
     
 }

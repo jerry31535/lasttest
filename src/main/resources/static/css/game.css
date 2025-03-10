@@ -1,0 +1,157 @@
+/* 設定整體樣式 */
+body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background-color: #604646; /* 深灰背景 */
+    color: rgb(78, 117, 155); /* 藍灰色文字 */
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+/* 容器調整 */
+.container {
+    width: 350px;
+    margin: 40px auto;
+    background: rgba(255, 255, 255, 0.1); /* 淡白色半透明背景 */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* 標題樣式 */
+h1 {
+    font-size: 60px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+h2{
+    
+    font-size: 50px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+p{
+    
+    font-size: 30px;
+    margin-top: 30px;
+    margin-bottom: 5px;
+}
+/* 輸入區塊 */
+#login-form, #register-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 輸入框調整 */
+.input-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 50px; /* 增加輸入框間距 */
+}
+
+.input-group label {
+    font-size: 18px;
+    color: green;
+    margin-right: 10px;
+    min-width: 60px; /* 標籤最小寬度 */
+    text-align: right;
+}
+
+.input-group input {
+    width: 250px;
+    height: 30px;
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 50px; /* 讓輸入框間距變大 */
+}
+
+/* 讓登入按鈕與輸入框有距離 */
+#login-form button {
+    margin-top: 30px;
+}
+
+/* 按鈕樣式 */
+button {
+    width: 120px;
+    height: 40px;
+    font-size: 18px;
+    color: #651717;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: transparent;
+}
+
+/* 讓返回首頁按鈕置中 */
+.btn-home-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 30px; /* 與登入框保持距離 */
+}
+
+/* "返回首頁" 按鈕調整 */
+.btn-home {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 300px;
+    height: 120px;
+    background-image: url('/images/butten3.png');
+    background-size: cover;
+    background-position: center;
+    text-decoration: none;
+    color: white; /* 讓文字顯示 */
+    font-size: 30px;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+    border-radius: 10px;
+    margin: 10px 0;
+    transition: 0.3s;
+    background-color: transparent; /* 移除白色背景 */
+}
+
+.btn-home:hover {
+    transform: scale(1.1);
+}
+
+/* 確保按鈕內文字可見 */
+.btn-home span {
+    position: absolute;
+}
+
+/* 背景圖片調整 */
+#background1 {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    max-height: 100vh;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+    z-index: 10;
+}
+#background3{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    max-height: 100vh;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+    z-index: 10;
+}

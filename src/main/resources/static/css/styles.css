@@ -1,59 +1,72 @@
-
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: black; 
-    color: #00ffff; 
+    font-family: 'Noto Sans TC', sans-serif; /* 使用 Noto Sans TC 作為中文字體 */
+    background-color: #604646; /* 深灰背景 */
+    color: rgb(78, 117, 155); /* 螢光綠文字 */
     text-align: center;
     margin: 0;
     padding: 0;
 }
 
-
 h1 {
     font-size: 80px;
-    text-shadow: 0 0 20px #00ffff; 
     margin: 50px 0px 30px 0px; 
 }
 
-
+/* 設定按鈕容器 */
 .button-container {
     display: flex;
     flex-direction: column; 
     align-items: center;
 }
 
-
+/* 設定按鈕樣式 */
 .btn {
-    display: block;
-    width: 250px; 
-    padding: 15px 30px;
-    font-size: 24px;
-    text-align: center;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 300px;
+    height: 120px;
+    background-image: url('/images/butten2.png');
+    background-size: 100% 210%;
+    background-position: center;
     text-decoration: none;
-    color: white;
-    background: rgba(0, 0, 0, 0.6); 
-    border: 2px solid #00ffff; 
+    color: white; /* 讓文字顯示 */
+    font-size: 30px;
+    font-weight: bold;
+    text-align: center;
+    border: none;
     border-radius: 10px;
-    margin: 20px 0; 
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.7); 
+    margin: 20px 0;
     transition: 0.3s;
 }
 
+.btn span {
+    position: absolute; /* 讓文字疊加在背景圖片上 */
+}
 
+
+/* 滑鼠懸停時的效果 */
 .btn:hover {
-    background: rgba(0, 255, 255, 0.3);
-    box-shadow: 0 0 30px rgba(0, 255, 255, 1); 
+    background-color: transparent; /* 當滑鼠懸停時背景色變暗 */
+    
     transform: scale(1.1);
 }
 
-/* 設定圖片 */
-#people {
-    position: fixed;         /* 固定在畫面上 */
-    bottom: 0;               /* 放在底部 */
-    right: -200px;           /* 調整右邊距離 */
-    transform: rotate(-20deg); /* 向左傾斜 20 度 */
-    width: 600px;            /* 設定圖片大小 */
-    height: auto;            /* 保持圖片比例 */
-    z-index: 10;             /* 確保圖片在其他元素上方 */
-    transition: transform 0.3s ease; /* 平滑過渡效果 */
+#background1 {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    max-height: 100vh;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+    transform: translateY(0); /* 確保圖片沒有額外偏移 */
+    z-index: 10;
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* 防止出現捲軸 */
 }

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>房間頁面</title>
+    <link rel="stylesheet" href="/static/css/style.css"> <!-- 連接樣式文件 -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .header .room-password {
+            display: none;
+            font-size: 16px;
+            color: #888;
+        }
+
+        .players-list {
+            margin-top: 30px;
+        }
+
+        .players-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .players-list li {
+            padding: 10px;
+            background-color: #f8f8f8;
+            margin-bottom: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .footer {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .footer button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .start-btn {
+            background-color: #28a745;
+            color: white;
+            cursor: not-allowed; /* 默認為禁用 */
+        }
+
+        .exit-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .start-btn.active {
+            cursor: pointer;
+        }
+
+        .footer button:disabled {
+            opacity: 0.5;
+        }
+
+        .room-name {
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 頭部，顯示房間名稱與密碼 -->
+    <div class="header">
+        <h1 class="room-name" id="room-name">房間名稱：五人房間</h1>
+        <span class="room-password" id="room-password">密碼：1234</span>
+    </div>
+
+    <!-- 玩家列表 -->
+    <div class="players-list">
+        <h3>已加入玩家：</h3>
+        <ul id="player-list">
+            <li>玩家1</li>
+            <li>玩家2</li>
+            <li>玩家3</li>
+            <li>玩家4</li>
+            <li>玩家5</li>
+        </ul>
+    </div>
+
+    <!-- 底部按鈕區 -->
+    <div class="footer">
+        <!-- 開始遊戲按鈕 -->
+        <button id="start-game-btn" class="start-btn" disabled>開始遊戲</button>
+        <!-- 退出房間按鈕 -->
+        <button id="exit-room-btn" class="exit-btn" onclick="window.location.href='/create-room'">退出房間</button>
+    </div>
+</div>
+
+<script src="/static/js/room.js"></script> <!-- 引用 JS 文件，稍後處理互動邏輯 -->
+
+</body>
+</html>

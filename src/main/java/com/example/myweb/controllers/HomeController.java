@@ -26,6 +26,7 @@ public class HomeController {
         return "game"; // 對應 resources/templates/game.html
     }
 
+
     @GetMapping("/game-lobby")
     public String gameLobby() {
         return "game-lobby"; // 這裡對應 src/main/resources/templates/game-lobby.html
@@ -45,4 +46,15 @@ public class HomeController {
     public String room() {
         return "room"; // 對應 resources/templates/room.html
     }
+
+    @GetMapping("/game-introduction")
+    public String gameintroduction() {
+        return "game-introduction"; // 對應 resources/templates/game-introduction.html
+    }
+
+    @GetMapping("/character-introduction")
+    public String characterintroduction() {
+        return "character-introduction"; // 對應 resources/templates/character-introduction.html
+    }
+    
 }

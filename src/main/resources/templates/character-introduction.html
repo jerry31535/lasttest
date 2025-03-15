@@ -4,143 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>角色介紹</title>
-    <style>
-        /* Body 基本設置 */
-    body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background-color: #604646;
-        margin: 0;
-        position: relative;
-    }
-
-    /* 返回按鈕 */
-    .back-btn {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        background: white;
-        border: none;
-        border-radius: 5px;
-        padding: 10px 15px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        cursor: pointer;
-        font-size: 16px;
-    }
-
-    /* 角色卡牌容器 */
-    .card-container {
-        position: relative;
-        width: 300px; /* 固定寬度 */
-        height: 400px; /* 固定高度 */
-        perspective: 1000px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    /* 角色卡牌 */
-    .card {
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        backface-visibility: hidden;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        transition: transform 0.6s;
-    }
-
-    /* 角色圖片樣式 */
-    .card img {
-        width: 80%; /* 控制圖片寬度 */
-        border-radius: 10px;
-    }
-
-    /* 角色描述樣式 */
-    .card p {
-        text-align: center;
-        padding: 10px;
-        font-size: 16px;
-    }
-
-    /* 左右切換按鈕 */
-    .arrow-btn {
-        position: absolute;
-        top: 50%;
-        background: white;
-        border: none;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        cursor: pointer;
-        font-size: 20px;
-    }
-
-    /* 左側按鈕 */
-    .left-btn {
-        left: -50px;
-    }
-
-    /* 右側按鈕 */
-    .right-btn {
-        right: -50px;
-    }
-    </style>
-
+    <link rel="stylesheet" href="/css/introduction.css">
+    <script src="/js/introduction.js" defer></script>
 </head>
 <body>
-    <button class="back-btn" onclick="history.back()">返回</button>
     <div class="card-container">
-        <button class="arrow-btn left-btn" onclick="prevCard()">←</button>
+        <button class="arrow-btn left-btn">←</button>
         <div class="card" id="character-card">
             <img src="/images/goodpeople1.png" alt="角色圖像">
-            <p id="character-info">🔧 工程師：可檢查一位玩家的資源卡，確認其為成功或失敗。</p>
+            <p id="character-info">🔧 工程師<br>可檢查一位玩家的資源卡，確認其為成功或失敗。</p>
         </div>
-        <button class="arrow-btn right-btn" onclick="nextCard()">→</button>
+        <button class="arrow-btn right-btn">→</button>
     </div>
-    
-    <script>
-        const characters = [
-        { img: "/images/goodpeople1.png", info: "🔧 工程師：可檢查一位玩家的資源卡，確認其為成功或失敗。" },
-        { img: "/images/goodpeople1.png", info: "⛑️ 醫護兵：可保護一名玩家，使其不受道具或事件影響。" },
-        { img: "/images/goodpeople1.png", info: "🎖️ 指揮官：可更換探索隊伍成員，但不能連續選擇相同的人。" },
-        { img: "/images/goodpeople1.png", info: "🧍 普通倖存者：無特殊能力，透過推理與投票影響遊戲。" },
-        { img: "/images/goodpeople1.png", info: "🕵️ 潛伏者：可偷偷更改提交的資源卡。" },
-        { img: "/images/goodpeople1.png", info: "💥 破壞者：可使一張資源卡失效，限用兩次。" },
-        { img: "/images/goodpeople1.png", info: "🎭 影武者：可偽裝身份，展示假身份。" },
-        { img: "/images/goodpeople1.png", info: "😈 邪惡平民：無特殊能力，但可協助邪惡方勝利。" }
-    ];
-
-    let currentIndex = 0;
-    function updateCard() {
-        const card = document.getElementById("character-card");
-        // 旋轉效果簡化為滑動或其他方式以避免重疊
-        card.style.transform = "scale(0.8)";  // 縮小後再放大
-        setTimeout(() => {
-            document.querySelector("#character-card img").src = characters[currentIndex].img;
-            document.querySelector("#character-info").textContent = characters[currentIndex].info;
-            card.style.transform = "scale(1)"; // 放大回正常大小
-        }, 300);
-    }
-
-    function nextCard() {
-        currentIndex = (currentIndex + 1) % characters.length;
-        updateCard();
-    }
-
-    function prevCard() {
-        currentIndex = (currentIndex - 1 + characters.length) % characters.length;
-        updateCard();
-    }
-
-    </script>
+    <a href="/about" class="back-btn">返回</a> <!-- 返回按鈕 -->
 </body>
 </html>

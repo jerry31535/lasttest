@@ -1,0 +1,128 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    margin: 0;
+    position: relative; /* 讓偽元素定位 */
+}
+
+/* 使用 `::before` 來新增半透明背景層 */
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/images/background.png') no-repeat center center / cover;
+    opacity: 0.5; /* 調整透明度（0 完全透明，1 完全不透明） */
+    z-index: -1; /* 確保它不會蓋住內容 */
+}
+
+/* 角色卡牌容器 */
+.card-container {
+    position: relative;
+    width: 500px; /* 容器大小 */
+    height: 750px;
+    perspective: 1000px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* 讓返回按鈕在內部排列 */
+}
+
+/* 角色卡牌 */
+.card {
+    width: 100%;
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: url('/images/introduction.png') no-repeat center center;
+    background-size: 80% auto;
+    position: relative;
+}
+
+/* 角色圖片 */
+.card img {
+    width: 80%; /* 縮小圖片 */
+    max-height: 70%;
+    margin: 10px;
+    border-radius: 10px;
+}
+
+.card p {
+    text-align: center;
+    padding: 10px;
+    font-size: 20px;
+    margin-top: -25px; /* 調整這個數值讓文字往上 */
+}
+
+/* 左右切換按鈕 */
+.arrow-btn {
+    position: absolute;
+    top: 50%;
+    background: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    font-size: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 左側按鈕 */
+.left-btn {
+    left: -60px;
+}
+
+/* 右側按鈕 */
+.right-btn {
+    right: -60px;
+}
+
+.back-btn {
+    position: absolute;
+    top: 20px;  /* 與畫面頂部的距離 */
+    left: 20px; /* 與畫面左側的距離 */
+    color: white;
+    background: #8b0000; /* 深紅色背景 */
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* 按鈕懸停顏色 */
+.back-btn:hover {
+    background-color: #45a049;
+}
+
+/* 讓返回按鈕在卡牌下方置中 */
+.card-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+

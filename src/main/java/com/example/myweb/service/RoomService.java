@@ -13,7 +13,7 @@ public class RoomService {
         this.roomRepository = roomRepository;
     }
 
-    public String createRoom(String roomName, int playerCount, String roomType) {
+    public String createRoom(String roomName, int playerCount, String roomType, String roomPassword) {
         // 檢查是否有相同名稱的房間
         if (roomRepository.existsByRoomName(roomName)) {
             return "房間名稱已經存在";
@@ -23,7 +23,12 @@ public class RoomService {
         room.setRoomName(roomName);
         room.setPlayerCount(playerCount);
         room.setRoomType(roomType);
-
+        
+        if ("private".equals(roomType)) {
+            room.setRoomPassword(roomPassword);
+        } else {
+            room.setRoomPassword(null);
+        }
         roomRepository.save(room);
         return "房間已成功創建，ID：" + room.getId();
     }

@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>房間頁面</title>
-    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="/static/css/style.css"> <!-- 連接樣式文件 -->
+
 
     <style>
         body {
@@ -120,49 +121,7 @@
     </div>
 </div>
 
-<script src="/js/room.js"></script> <!-- 修正 JS 引用路徑 -->
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    // 取得房間資訊
-    const roomName = localStorage.getItem("roomName");
-    const roomPassword = localStorage.getItem("roomPassword");
-    const players = JSON.parse(localStorage.getItem("players") || "[]");
-
-    // 設定房間名稱
-    if (roomName) {
-        document.getElementById("room-name").textContent = `房間名稱：${roomName}`;
-    }
-
-    // 設定房間密碼（如果有）
-    if (roomPassword) {
-        document.getElementById("room-password").textContent = `密碼：${roomPassword}`;
-        document.getElementById("room-password").style.display = "inline";
-    }
-
-    // 更新玩家列表
-    const playerList = document.getElementById("player-list");
-    players.forEach(player => {
-        const li = document.createElement("li");
-        li.textContent = player;
-        playerList.appendChild(li);
-    });
-
-    // 如果玩家人數達到 5 人，啟用「開始遊戲」按鈕
-    const startGameBtn = document.getElementById("start-game-btn");
-    if (players.length >= 5) {
-        startGameBtn.disabled = false;
-        startGameBtn.classList.add("active");
-    }
-
-    // 「開始遊戲」按鈕的事件
-    startGameBtn.addEventListener("click", function () {
-        alert("遊戲即將開始！");
-        // 這裡可以加上跳轉到遊戲頁面的邏輯，例如：
-        // window.location.href = "/game";
-    });
-});
-</script>
 
 </body>
 </html>

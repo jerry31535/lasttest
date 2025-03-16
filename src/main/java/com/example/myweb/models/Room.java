@@ -6,12 +6,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "rooms")  // 指定 MongoDB 集合名稱
 public class Room {
     @Id
-    private String id; // MongoDB 會自動產生 ID
+    private String id;
     private String roomName;
     private int playerCount;
     private String roomType;
+    private String roomPassword; // ✅ 新增房間密碼欄位
 
-    // ✅ 確保有 getId() 方法
+    // Getter 和 Setter
     public String getId() {
         return id;
     }
@@ -42,5 +43,13 @@ public class Room {
 
     public void setRoomType(String roomType) {
         this.roomType = roomType;
+    }
+
+    public String getRoomPassword() {
+        return roomPassword;
+    }
+
+    public void setRoomPassword(String roomPassword) {
+        this.roomPassword = roomPassword;
     }
 }

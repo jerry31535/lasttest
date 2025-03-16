@@ -31,12 +31,14 @@ async function createRoom() {
             body: JSON.stringify(roomData),
         });
 
-        const result = await response.json(); // 改為 `json()` 以確保正確解析回應
+        const result = await response.text();  // 這裡用 text() 來獲取錯誤訊息
+        // 改為 `json()` 以確保正確解析回應
 
         if (response.ok) {
-            // 儲存房間名稱到 localStorage，然後跳轉
-            localStorage.setItem("roomName", roomName);
-            window.location.href = `/room?roomId=${result.roomId}`;
+            // 成功創建房間，跳轉到房間頁面
+            const room = JSON.parse(result);  // 從後端返回的結果解析房間資訊
+            window.location.href = `/room`;
+            
         } else {
             alert(result.message || "創建房間失敗，請稍後再試！");
         }

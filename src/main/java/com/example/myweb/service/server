@@ -1,0 +1,13 @@
+@RestController
+@RequestMapping("/api/room")
+public class RoomController {
+
+    @GetMapping("/{roomId}")
+    public ResponseEntity<Map<String, String>> getRoom(@PathVariable String roomId) {
+        // 假設從 MongoDB 取得房間名稱
+        String roomName = "從資料庫取得的房間名稱"; // 這裡要改成真正的查詢
+        Map<String, String> response = new HashMap<>();
+        response.put("roomName", roomName);
+        return ResponseEntity.ok(response);
+    }
+}

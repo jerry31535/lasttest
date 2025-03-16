@@ -16,6 +16,7 @@ public class RoomController {
 
     @Autowired
     private RoomRepository roomRepository;
+    
 
     @PostMapping("/create-room")
     public ResponseEntity<Object> createRoom(@RequestBody Room room) {
@@ -31,6 +32,9 @@ public class RoomController {
 
         // 設置房間 ID 並儲存
         room.setId(UUID.randomUUID().toString());
+        if (!"private".equals(room.getRoomType())) {
+            room.setRoomPassword(null);
+        }
         roomRepository.save(room);
 
         return ResponseEntity.ok().body(room); // 返回創建成功的房間對象

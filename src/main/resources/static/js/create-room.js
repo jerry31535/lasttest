@@ -31,21 +31,21 @@ async function createRoom() {
             body: JSON.stringify(roomData),
         });
 
-        const result = await response.text();  // 這裡用 text() 來獲取錯誤訊息
+        const result = await response.json(); // 改為 `json()` 以確保正確解析回應
 
         if (response.ok) {
-            // 成功創建房間，跳轉到房間頁面
-            const room = JSON.parse(result);  // 從後端返回的結果解析房間資訊
-            window.location.href = `/room`;
+            // 儲存房間名稱到 localStorage，然後跳轉
+            localStorage.setItem("roomName", roomName);
+            window.location.href = `/room?roomId=${result.roomId}`;
         } else {
-            // 顯示後端返回的錯誤訊息
-            alert(result); // 顯示具體的錯誤訊息
+            alert(result.message || "創建房間失敗，請稍後再試！");
         }
     } catch (error) {
         console.error("創建房間時發生錯誤:", error);
         alert("系統錯誤，請稍後再試！");
     }
 }
+
 // 返回遊戲大廳
 function goBack() {
     window.location.href = "/game-lobby";

@@ -5,6 +5,21 @@
     <title>創建遊戲房間</title>
     <link rel="stylesheet" href="/css/styles.css">
     <script src="/js/create-room.js" defer></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const roomTypeSelect = document.getElementById("room-type");
+            const passwordContainer = document.getElementById("password-container");
+    
+            roomTypeSelect.addEventListener("change", function () {
+                if (roomTypeSelect.value === "private") {
+                    passwordContainer.style.display = "block"; // 顯示密碼輸入框
+                } else {
+                    passwordContainer.style.display = "none"; // 隱藏密碼輸入框
+                }
+            });
+        });
+    </script>
+    
     <style>
         .container {
             max-width: 400px;
@@ -60,9 +75,10 @@
                 <!-- 產生 5~10 人的選項 -->
                 <script>
                     for (let i = 5; i <= 10; i++) {
-                        document.write(`<option value="${i}">${i} 人</option>`);
+                        document.write(`<option value="${i}">${i} 人</option>`); 
                     }
                 </script>
+                
             </select>
         </div>
 

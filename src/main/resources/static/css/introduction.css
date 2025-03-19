@@ -61,6 +61,7 @@ body::before {
     text-align: center;
     padding: 10px;
     font-size: 20px;
+    color: white;
     margin-top: -25px; /* 調整這個數值讓文字往上 */
 }
 

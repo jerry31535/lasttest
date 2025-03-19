@@ -1,0 +1,32 @@
+body {
+    justify-content: center;
+    align-items: center;  /* 垂直居中 */
+    text-align: center; /* 文字水平居中 */
+    display: flex;
+    height: 100vh;
+    background-size: cover;
+    background-position: center center;
+    color: rgb(14, 13, 13); 
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    margin: 0;
+    position: relative; /* 確保偽元素定位正確 */
+}
+
+h1, h2 {
+    color: rgb(71, 43, 13);
+    text-align: center; /* 文字水平居中 */
+}
+
+/* 使用 ::before 來新增半透明背景層 */
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/images/background.png') no-repeat center center / cover;
+    opacity: 0.5; /* 調整透明度（0 完全透明，1 完全不透明） */
+    z-index: -1; /* 確保它不會蓋住內容 */
+}

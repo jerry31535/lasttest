@@ -2,6 +2,7 @@ package com.example.myweb.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class HomeController {
@@ -42,9 +43,9 @@ public class HomeController {
         return "join-room"; // 對應 resources/templates/join-room.html
     }
 
-    @GetMapping("/room")
-    public String room() {
-        return "room"; // 對應 resources/templates/room.html
+    @GetMapping("/room/{roomId}")
+    public String getRoomPage(@PathVariable String roomId) {
+        return "room";  // 返回 room.html
     }
 
     @GetMapping("/game-introduction")
@@ -56,5 +57,6 @@ public class HomeController {
     public String characterintroduction() {
         return "character-introduction"; // 對應 resources/templates/character-introduction.html
     }
+    
     
 }

@@ -37,7 +37,7 @@ async function createRoom() {
         if (response.ok) {
             // 成功創建房間，跳轉到房間頁面
             const room = JSON.parse(result);  // 從後端返回的結果解析房間資訊
-            window.location.href = `/room`;
+            window.location.href = `/room/${room.id}`;
             
         } else {
             alert(result.message || "創建房間失敗，請稍後再試！");

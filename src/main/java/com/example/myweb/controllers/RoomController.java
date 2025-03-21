@@ -17,7 +17,7 @@ public class RoomController {
     @Autowired
     private RoomRepository roomRepository;
     
-
+    
     @PostMapping("/create-room")
     public ResponseEntity<Object> createRoom(@RequestBody Room room) {
         // 檢查是否已經有相同名稱的房間

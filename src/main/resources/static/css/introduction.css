@@ -104,6 +104,7 @@ body::before {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     cursor: pointer;
     font-size: 16px;
+    text-decoration: none;
 }
 
 /* 按鈕懸停顏色 */

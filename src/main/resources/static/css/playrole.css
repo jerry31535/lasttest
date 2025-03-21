@@ -30,3 +30,17 @@ body::before {
     opacity: 0.5; /* 調整透明度（0 完全透明，1 完全不透明） */
     z-index: -1; /* 確保它不會蓋住內容 */
 }
+.back-btn {
+    position: fixed; /* 固定在螢幕左上角 */
+    top: 20px;  
+    left: 20px; 
+    color: white;
+    background: #8b0000; /* 深紅色背景 */
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    font-size: 16px;
+    z-index: 1000; /* 確保不會被其他元素蓋住 */
+}

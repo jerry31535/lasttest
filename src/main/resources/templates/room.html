@@ -4,121 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>房間頁面</title>
-    <link rel="stylesheet" href="/static/css/style.css"> <!-- 連接樣式文件 -->
-
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 2px solid #ddd;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        .header .room-password {
-            font-size: 16px;
-            color: #888;
-            display: none; /* 預設隱藏 */
-        }
-
-        .players-list {
-            margin-top: 30px;
-        }
-
-        .players-list ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .players-list li {
-            padding: 10px;
-            background-color: #f8f8f8;
-            margin-bottom: 5px;
-            border: 1px solid #ddd;
-        }
-
-        .footer {
-            margin-top: 30px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .footer button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-        }
-
-        .start-btn {
-            background-color: #28a745;
-            color: white;
-            cursor: not-allowed;
-        }
-
-        .exit-btn {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .start-btn.active {
-            cursor: pointer;
-        }
-
-        .footer button:disabled {
-            opacity: 0.5;
-        }
-
-        .room-name {
-            font-size: 20px;
-            font-weight: bold;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/css/room.css">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
 </head>
 <body>
+    <div class="container">
+        <!-- 頭部，顯示房間名稱與密碼 -->
+        <div class="header">
+            <h1 class="room-name" id="room-name">房間名稱</h1>
+            <span class="room-password" id="room-password">密碼：****</span>
+        </div>
 
-<div class="container">
-    <!-- 頭部，顯示房間名稱與密碼 -->
-    <div class="header">
-        <h1 class="room-name" id="room-name">房間名稱</h1>
-        <span class="room-password" id="room-password">密碼：****</span>
+        <!-- 玩家列表 -->
+        <div class="players-list">
+            <h3>已加入玩家：</h3>
+            <ul id="player-list"></ul> <!-- 玩家列表動態生成 -->
+        </div>
+
+        <!-- 底部按鈕區 -->
+        <div class="footer">
+            <!-- 開始遊戲按鈕 -->
+            <button id="start-game-btn" class="start-btn" disabled>開始遊戲</button>
+            <!-- 退出房間按鈕 -->
+            <button id="exit-room-btn" class="exit-btn" onclick="confirmExit()">退出房間</button>
+        </div>
     </div>
 
-    <!-- 玩家列表 -->
-    <div class="players-list">
-        <h3>已加入玩家：</h3>
-        <ul id="player-list"></ul> <!-- 玩家列表動態生成 -->
-    </div>
+    <script>
+        const socket = new SockJS('/ws');
+        const stompClient = Stomp.over(socket);
 
-    <!-- 底部按鈕區 -->
-    <div class="footer">
-        <!-- 開始遊戲按鈕 -->
-        <button id="start-game-btn" class="start-btn" disabled>開始遊戲</button>
-        <!-- 退出房間按鈕 -->
-        <button id="exit-room-btn" class="exit-btn" onclick="window.location.href='/create-room'">退出房間</button>
-    </div>
-</div>
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+
+            // 訂閱房間更新消息
+            stompClient.subscribe('/topic/room-updates', function (message) {
+                const playerName = message.body;
+                updatePlayerList(playerName); // 更新玩家列表
+            });
+        });
+
+        // 更新玩家列表
+        function updatePlayerList(playerName) {
+            const playerList = document.getElementById('player-list');
+            const playerItem = document.createElement('li');
+            playerItem.textContent = playerName;
+            playerList.appendChild(playerItem);
+        }
+
+        // 初始化房間信息
+        const roomId = window.location.pathname.split('/')[2]; // 從 URL 獲取 roomId
+        if (!roomId) {
+            alert("房間 ID 無效！");
+            window.location.href = '/game-lobby'; // 跳轉回遊戲大廳
+        } else {
+            fetch(`/api/room/${roomId}`)
+                .then(response => response.json())
+                .then(room => {
+                    document.getElementById('room-name').textContent = room.roomName;
+                    if (room.roomPassword) {
+                        document.getElementById('room-password').style.display = 'inline';
+                        document.getElementById('room-password').textContent = `密碼：${room.roomPassword}`;
+                    }
+                })
+                .catch(error => {
+                    console.error("獲取房間信息錯誤:", error);
+                    alert("獲取房間信息失敗，請稍後再試！");
+                    window.location.href = '/game-lobby'; // 跳轉回遊戲大廳
+                });
+        }
+
+        // 確認退出房間
+       // 確認退出房間
+function confirmExit() {
+    const shouldKeepRoom = confirm("是否保留房間？\n\n選擇「確定」保留房間，其他玩家可以繼續加入。\n選擇「取消」刪除房間。");
+    if (shouldKeepRoom) {
+        // 保留房間，不跳轉頁面，也不斷開 WebSocket 連接
+        alert("已退出房間，房間保留中。");
+    } else {
+        // 刪除房間，發送請求到後端
+        fetch(`/api/delete-room/${roomId}`, {
+            method: 'DELETE'
+        }).then(response => {
+            if (response.ok) {
+                alert("房間已刪除！");
+                window.location.href = '/game-lobby'; // 刪除房間後跳轉回遊戲大廳
+            } else {
+                alert("刪除房間失敗，請稍後再試！");
+            }
+        }).catch(error => console.error("刪除房間錯誤:", error));
+    }
+}
+    </script>
 </body>
 </html>

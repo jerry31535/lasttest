@@ -7,4 +7,5 @@ import java.util.Optional;
 public interface RoomRepository extends MongoRepository<Room, String> {
     boolean existsByRoomName(String roomName);
     Optional<Room> findByRoomName(String roomName);
+    Optional<Room> findByRoomPassword(String roomPassword);
 }

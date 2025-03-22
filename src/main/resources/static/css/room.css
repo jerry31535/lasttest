@@ -1,0 +1,87 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 2px solid #ddd;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.header .room-password {
+    font-size: 16px;
+    color: #888;
+    display: none; /* 預設隱藏 */
+}
+
+.players-list {
+    margin-top: 30px;
+}
+
+.players-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.players-list li {
+    padding: 10px;
+    background-color: #f8f8f8;
+    margin-bottom: 5px;
+    border: 1px solid #ddd;
+}
+
+.footer {
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.footer button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+}
+
+.start-btn {
+    background-color: #28a745;
+    color: white;
+    cursor: not-allowed;
+}
+
+.exit-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.start-btn.active {
+    cursor: pointer;
+}
+
+.footer button:disabled {
+    opacity: 0.5;
+}
+
+.room-name {
+    font-size: 20px;
+    font-weight: bold;
+}

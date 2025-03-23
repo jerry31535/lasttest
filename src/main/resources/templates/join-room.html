@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <title>加入遊戲房間</title>
     <link rel="stylesheet" href="/css/join-room.css">
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
     <script src="/js/join-room.js" defer></script>
 </head>
 <body>
@@ -19,115 +17,9 @@
             </div>
         </div>
 
-        <!-- 私人房間輸入 -->
-        <div class="box">
-            <h2>與好友一同遊玩!</h2>
-            <p>請輸入房間密碼</p>
-            <input type="text" id="room-password" placeholder="請輸入密碼">
-            <button onclick="joinPrivateRoom()">加入</button>
-        </div>
+        
     </div>
 
-    <script>
-        const socket = new SockJS('/ws');
-        const stompClient = Stomp.over(socket);
-
-        // 初始化房間列表
-        function initializeRoomList() {
-            fetch('/api/rooms') // 從後端獲取當前房間列表
-                .then(response => response.json())
-                .then(rooms => {
-                    const roomList = document.getElementById('room-list');
-                    const noRoomMessage = roomList.querySelector('.no-room');
-
-                    if (rooms.length > 0 && noRoomMessage) {
-                        roomList.removeChild(noRoomMessage); // 移除 "目前沒有遊戲房間QQ" 的提示
-                    }
-
-                    rooms.forEach(room => {
-                        const roomItem = document.createElement('div');
-                        roomItem.className = 'room-item';
-                        roomItem.textContent = room.roomName;
-                        roomItem.onclick = () => joinRoom(room.id); // 點擊房間加入
-                        roomList.appendChild(roomItem);
-                    });
-                })
-                .catch(error => console.error("獲取房間列表錯誤:", error));
-        }
-
-        // WebSocket 連接
-        stompClient.connect({}, function (frame) {
-            console.log('Connected: ' + frame);
-
-            // 訂閱房間更新消息
-            stompClient.subscribe('/topic/rooms', function (message) {
-                const room = JSON.parse(message.body);
-                updateRoomList(room); // 更新房間列表
-            });
-        });
-
-        // 更新房間列表
-        function updateRoomList(room) {
-            const roomList = document.getElementById('room-list');
-            const noRoomMessage = roomList.querySelector('.no-room');
-
-            if (noRoomMessage) {
-                roomList.removeChild(noRoomMessage); // 移除 "目前沒有遊戲房間QQ" 的提示
-            }
-
-            const roomItem = document.createElement('div');
-            roomItem.className = 'room-item';
-            roomItem.textContent = room.roomName;
-            roomItem.onclick = () => joinRoom(room.id); // 點擊房間加入
-            roomList.appendChild(roomItem);
-        }
-
-        // 加入房間
-        function joinRoom(roomId) {
-            const username = prompt("請輸入你的用戶名：");
-            if (!username) return;
-
-            fetch(`/api/join-room?roomId=${roomId}&username=${username}`, {
-                method: 'POST'
-            }).then(response => response.json())
-              .then(data => {
-                  alert(data);
-                  window.location.href = `/room/${roomId}`; // 跳轉到房間頁面
-              }).catch(error => console.error("加入房間錯誤:", error));
-        }
-
-        // 加入私人房間
-        function joinPrivateRoom() {
-            const roomPassword = document.getElementById('room-password').value;
-            if (!roomPassword) {
-                alert("請輸入房間密碼！");
-                return;
-            }
-
-            const username = prompt("請輸入你的用戶名：");
-            if (!username) return;
-
-            // 根據密碼查找房間 ID
-            fetch(`/api/find-room-by-password?password=${roomPassword}`)
-                .then(response => response.json())
-                .then(room => {
-                    if (room) {
-                        fetch(`/api/join-room?roomId=${room.id}&username=${username}`, {
-                            method: 'POST'
-                        }).then(response => response.json())
-                          .then(data => {
-                              alert(data);
-                              window.location.href = `/room/${room.id}`; // 跳轉到房間頁面
-                          }).catch(error => console.error("加入房間錯誤:", error));
-                    } else {
-                        alert("找不到對應的房間！");
-                    }
-                })
-                .catch(error => console.error("查找房間錯誤:", error));
-        }
-
-        // 頁面加載時初始化房間列表
-        initializeRoomList();
-    </script>
+    
 </body>
 </html>

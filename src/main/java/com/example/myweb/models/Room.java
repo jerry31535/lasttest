@@ -3,14 +3,18 @@ package com.example.myweb.models;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "rooms")  // 指定 MongoDB 集合名稱
+import java.util.ArrayList;
+import java.util.List;
+
+@Document(collection = "rooms")
 public class Room {
     @Id
     private String id;
     private String roomName;
     private int playerCount;
     private String roomType;
-    private String roomPassword; // ✅ 新增房間密碼欄位
+    private String roomPassword;
+    private List<String> players = new ArrayList<>(); // 新增 players 欄位
 
     // Getter 和 Setter
     public String getId() {
@@ -51,5 +55,13 @@ public class Room {
 
     public void setRoomPassword(String roomPassword) {
         this.roomPassword = roomPassword;
+    }
+
+    public List<String> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(List<String> players) {
+        this.players = players;
     }
 }

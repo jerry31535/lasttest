@@ -19,6 +19,7 @@ body {
     align-items: center;
     padding: 10px;
     border-bottom: 2px solid #ddd;
+    position: relative; /* 新增：讓密碼可以相對於 header 定位 */
 }
 
 .header h1 {
@@ -30,6 +31,9 @@ body {
     font-size: 16px;
     color: #888;
     display: none; /* 預設隱藏 */
+    position: absolute; /* 新增：絕對定位 */
+    top: 10px; /* 距離 header 頂部 10px */
+    right: 10px; /* 距離 header 右側 10px */
 }
 
 .players-list {

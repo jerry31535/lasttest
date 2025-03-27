@@ -1,18 +1,3 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // 取得圖片元素
-    const peopleImage = document.getElementById('people');
-
-    // 當滑鼠進入圖片時放大
-    peopleImage.addEventListener('mouseover', function() {
-        peopleImage.style.transform = 'rotate(-20deg) scale(1.2)';
-    });
-
-    // 當滑鼠移出圖片時恢復原狀
-    peopleImage.addEventListener('mouseout', function() {
-        peopleImage.style.transform = 'rotate(-20deg) scale(1)';
-    });
-});
-
 // 顯示註冊表單
 function showRegisterForm() {
     document.getElementById('login-form').style.display = 'none';
@@ -25,7 +10,7 @@ function showLoginForm() {
     document.getElementById('login-form').style.display = 'block';
 }
 
-// 註冊功能
+// 註冊功能（修正後的，使用POST）
 function register() {
     const username = document.getElementById('register-username').value;
     const password = document.getElementById('register-password').value;
@@ -35,21 +20,33 @@ function register() {
         return;
     }
 
-    // 發送註冊請求
-    fetch('/auth/do-register?username=' + username + '&password=' + password)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("註冊成功！");
-                showLoginForm(); // 顯示登入表單
-            } else {
-                alert(data.message);
-            }
-        })
-        .catch(error => console.error("註冊錯誤:", error));
+    fetch('/auth/do-register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('網路錯誤或伺服器錯誤');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert("註冊成功！");
+            showLoginForm(); // 顯示登入表單
+        } else {
+            alert(data.message || "註冊失敗！");
+        }
+    })
+    .catch(error => {
+        console.error("註冊錯誤:", error);
+        alert("註冊過程出錯");
+    });
 }
 
-// 登入功能
 function login() {
     const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
@@ -59,17 +56,29 @@ function login() {
         return;
     }
 
-    // 發送登入請求
-    fetch('/auth/do-login?username=' + username + '&password=' + password)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("登入成功！");
-                window.location.href = '/game-lobby'; // 跳轉到遊戲大廳頁面
-            } else {
-                alert(data.message);
-            }
-        })
-        .catch(error => console.error("登入錯誤:", error));
+    fetch('/auth/do-login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("伺服器錯誤");
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert("登入成功！");
+            window.location.href = '/game-lobby';
+        } else {
+            alert(data.message || "登入失敗！");
+        }
+    })
+    .catch(error => {
+        console.error("登入錯誤:", error);
+        alert("登入過程出錯");
+    });
 }
- 

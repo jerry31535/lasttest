@@ -1,11 +1,16 @@
 async function createRoom() {
     const roomName = document.getElementById("room-name").value;
+    const creatorName = document.getElementById("creator-name").value; // 取得創建玩家名稱
     const roomType = document.getElementById("room-type").value;
     const roomPassword = document.getElementById("room-password").value;
     const playerCount = parseInt(document.getElementById("player-count").value, 10);
 
     if (!roomName) {
         alert("請輸入房間名稱！");
+        return;
+    }
+    if (!creatorName) {
+        alert("請輸入創建玩家名稱！");
         return;
     }
     if (roomType === "private" && !roomPassword) {
@@ -25,20 +30,17 @@ async function createRoom() {
     };
 
     try {
-        const response = await fetch("/api/create-room", {
+        // 傳送創建玩家名稱作為 query 參數
+        const response = await fetch(`/api/create-room?creatorName=${encodeURIComponent(creatorName)}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(roomData),
         });
-
-        const result = await response.json(); // 使用 json() 解析回應
-
+        const result = await response.json();
 
         if (response.ok) {
-            const room = result; // 從後端返回的結果解析房間資訊
+            const room = result; // 從後端返回的房間資訊
             window.location.href = `/room/${room.id}`;
-            
-
         } else {
             alert(result.message || "創建房間失敗，請稍後再試！");
         }

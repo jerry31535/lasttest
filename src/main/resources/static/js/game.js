@@ -10,7 +10,7 @@ function showLoginForm() {
     document.getElementById('login-form').style.display = 'block';
 }
 
-// 註冊功能（修正後的，使用POST）
+// 註冊功能（使用 POST）
 function register() {
     const username = document.getElementById('register-username').value;
     const password = document.getElementById('register-password').value;
@@ -22,9 +22,7 @@ function register() {
 
     fetch('/auth/do-register', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
     })
     .then(response => {
@@ -58,9 +56,7 @@ function login() {
 
     fetch('/auth/do-login', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
     })
     .then(response => {
@@ -71,6 +67,8 @@ function login() {
     })
     .then(data => {
         if (data.success) {
+            // 將玩家名稱存入 sessionStorage
+            sessionStorage.setItem("playerName", username);
             alert("登入成功！");
             window.location.href = '/game-lobby';
         } else {

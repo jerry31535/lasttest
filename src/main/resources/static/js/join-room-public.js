@@ -48,12 +48,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   async function joinRoom(roomId) {
-    // 公開房間無需密碼
-    const playerName = prompt("請輸入您的玩家名稱：");
+    // 取得登入玩家的名稱，從 sessionStorage 中讀取
+    const playerName = sessionStorage.getItem("playerName");
     if (!playerName) {
-      alert("玩家名稱不能為空！");
+      alert("請先登入並設定玩家名稱！");
       return;
     }
+    
     const joinUrl = `/api/join-room?roomId=${roomId}&playerName=${encodeURIComponent(playerName)}`;
     try {
       const joinResponse = await fetch(joinUrl, { method: "POST" });

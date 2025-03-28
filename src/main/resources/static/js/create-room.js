@@ -1,16 +1,11 @@
 async function createRoom() {
     const roomName = document.getElementById("room-name").value;
-    const creatorName = document.getElementById("creator-name").value; // 取得創建玩家名稱
     const roomType = document.getElementById("room-type").value;
     const roomPassword = document.getElementById("room-password").value;
     const playerCount = parseInt(document.getElementById("player-count").value, 10);
 
     if (!roomName) {
         alert("請輸入房間名稱！");
-        return;
-    }
-    if (!creatorName) {
-        alert("請輸入創建玩家名稱！");
         return;
     }
     if (roomType === "private" && !roomPassword) {
@@ -22,6 +17,13 @@ async function createRoom() {
         return;
     }
 
+    // 從 sessionStorage 取得登入玩家名稱
+    const playerName = sessionStorage.getItem("playerName");
+    if (!playerName) {
+        alert("請先登入並設定玩家名稱！");
+        return;
+    }
+
     const roomData = {
         roomName,
         roomType,
@@ -30,8 +32,8 @@ async function createRoom() {
     };
 
     try {
-        // 傳送創建玩家名稱作為 query 參數
-        const response = await fetch(`/api/create-room?creatorName=${encodeURIComponent(creatorName)}`, {
+        // 傳送 playerName 作為 query 參數
+        const response = await fetch(`/api/create-room?playerName=${encodeURIComponent(playerName)}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(roomData),

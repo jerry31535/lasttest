@@ -25,6 +25,11 @@
     .no-room {
       color: gray;
     }
+    .back-button {
+      margin-top: 20px;
+      padding: 8px 16px;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
@@ -34,8 +39,8 @@
     <div id="room-list-container">
       <div id="room-list"></div>
     </div>
+    <button class="back-button" onclick="window.history.back()">返回上一頁</button>
   </div>
-
   <script src="/js/join-room-public.js"></script>
 </body>
 </html>

@@ -24,7 +24,8 @@ public class RoomController {
     
     @PostMapping("/create-room")
     public ResponseEntity<Object> createRoom(
-            @RequestBody Room room, @RequestParam String creatorName) {
+            @RequestBody Room room, @RequestParam String playerName) {
+        // 將房間名稱加上「房間」後綴
         String formattedRoomName = room.getRoomName() + "房間";
         room.setRoomName(formattedRoomName);
         Optional<Room> existingRoom = roomRepository.findAll().stream()
@@ -40,8 +41,8 @@ public class RoomController {
         if (!"private".equals(room.getRoomType())) {
             room.setRoomPassword(null);
         }
-        // 使用 Arrays.asList 建立包含創建玩家名稱的 List
-        room.setPlayers(new ArrayList<>(Arrays.asList(creatorName)));
+        // 將從前端傳入的 playerName（即登入存入 sessionStorage 的名稱）存入 players[0]
+        room.setPlayers(new ArrayList<>(Arrays.asList(playerName)));
         roomRepository.save(room);
     
         return ResponseEntity.ok().body(room);
@@ -71,8 +72,7 @@ public class RoomController {
         }
         Room room = roomOpt.get();
         
-        
-        
+        // 私人房間的密碼驗證由前端處理，這裡不再驗證
         List<String> players = room.getPlayers();
         if (players.size() >= room.getPlayerCount()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("房間人數已滿");

@@ -1,6 +1,6 @@
 body {
     font-family: 'Noto Sans TC', sans-serif;
-    color: rgb(78, 117, 155); /* 螢光綠文字 */
+    color: white; /* 螢光綠文字 */
     text-align: center;
     margin: 0;
     padding: 0;
@@ -31,11 +31,13 @@ body {
     backdrop-filter: blur(10px); /* 讓背景變模糊 */
 }
 
-/* 標題樣式 */
-h1 {
-    font-size: 40px;
-    margin-bottom: 20px; /* 與輸入框的間距 */
-    text-align: center;
+#title {
+    width: 550px;
+    max-width: 85%;
+    height: auto;
+    display: block;
+    margin: 5px auto;
+    margin-bottom: -10px;
 }
 
 /* 調整輸入欄位與按鈕的間距 */

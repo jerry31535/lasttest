@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>加入私人房間</title>
+  <link rel="stylesheet" href="/css/join-room.css">
+  <style>
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      text-align: center;
+    }
+    #room-search {
+      width: 80%;
+      padding: 8px;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+    .room-item {
+      padding: 10px;
+      border: 1px solid #ccc;
+      margin: 5px;
+      cursor: pointer;
+    }
+    .no-room {
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>加入私人房間</h1>
+    <input type="text" id="room-search" placeholder="搜尋房間名稱">
+    <div id="room-list-container">
+      <div id="room-list"></div>
+    </div>
+  </div>
+
+  <script src="/js/join-room-private.js"></script>
+</body>
+</html>

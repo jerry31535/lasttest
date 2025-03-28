@@ -28,41 +28,34 @@
   </div>
 
   <script>
-    // 測試用 log，確認檔案載入
     console.log("room.js loaded");
+    let pollingInterval = null;
 
-    let pollingInterval = null; // 用來儲存 setInterval 的回傳值
-
-    // 頁面加載時執行
+    // 當頁面 DOM 載入完成時執行
     document.addEventListener("DOMContentLoaded", () => {
       console.log("DOMContentLoaded triggered");
-
-      loadRoomData();        // 第一次載入房間資料
-      setupExitRoomButton(); // 設置退出房間按鈕功能
-      
-      // 每隔 3 秒輪詢一次
+      loadRoomData();
+      setupExitRoomButton();
+      // 每隔 3 秒輪詢一次房間資料
       pollingInterval = setInterval(() => {
         loadRoomData();
       }, 3000);
     });
 
     async function loadRoomData() {
-      // 從 URL 取得房間 ID (假設 URL 格式為 /room/{roomId})
       const roomId = window.location.pathname.split("/").pop();
       console.log("Polling room data for roomId:", roomId);
       try {
         const response = await fetch(`/api/room/${roomId}`, { cache: "no-cache" });
-        if (!response.ok) {
-          throw new Error("無法獲取房間資料");
-        }
+        if (!response.ok) throw new Error("無法獲取房間資料");
         const room = await response.json();
         console.log("最新房間資料:", room);
 
-        // 顯示房間名稱
+        // 更新房間名稱
         const roomNameEl = document.getElementById("room-name");
         roomNameEl.textContent = room.roomName || "無房間名稱";
 
-        // 顯示密碼（如果是私人房間）
+        // 顯示或隱藏密碼
         const roomPasswordElement = document.getElementById("room-password");
         if (room.roomPassword) {
           roomPasswordElement.textContent = `密碼：${room.roomPassword}`;
@@ -78,7 +71,7 @@
           `<li>玩家 ${index + 1}: ${player || "等待加入"}</li>`
         ).join("");
 
-        // 啟用開始遊戲按鈕（如果玩家數量足夠）
+        // 啟用或停用「開始遊戲」按鈕
         const startGameBtn = document.getElementById("start-game-btn");
         if (players.length >= room.playerCount) {
           startGameBtn.disabled = false;
@@ -95,11 +88,27 @@
 
     function setupExitRoomButton() {
       const exitRoomBtn = document.getElementById("exit-room-btn");
-      exitRoomBtn.addEventListener("click", () => {
-        if (pollingInterval) {
-          clearInterval(pollingInterval);
+      exitRoomBtn.addEventListener("click", async () => {
+        // 取得玩家名稱，可從 sessionStorage 取得，或使用 prompt
+        let playerName = sessionStorage.getItem("playerName");
+        if (!playerName) {
+          playerName = prompt("請輸入您的玩家名稱：");
+          if (!playerName) return;
+          sessionStorage.setItem("playerName", playerName);
         }
-        window.location.href = "/game-lobby";
+        try {
+          const roomId = window.location.pathname.split("/").pop();
+          const response = await fetch(`/api/exit-room?roomId=${roomId}&playerName=${encodeURIComponent(playerName)}`, {
+            method: "POST"
+          });
+          const result = await response.json();
+          alert(result.message || "退出房間成功");
+          if (pollingInterval) clearInterval(pollingInterval);
+          window.location.href = "/game-lobby";
+        } catch (error) {
+          console.error("退出房間時發生錯誤:", error);
+          alert("退出房間失敗，請稍後再試！");
+        }
       });
     }
   </script>

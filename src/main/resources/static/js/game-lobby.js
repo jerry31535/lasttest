@@ -18,5 +18,5 @@ function createGameRoom() {
 }
 
 function joinGameRoom() {
-    window.location.href = "/join-room";
+    window.location.href = "/join-room-selection";
 }

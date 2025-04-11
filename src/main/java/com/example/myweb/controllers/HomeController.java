@@ -56,6 +56,11 @@ public class HomeController {
     public String getRoomPage(@PathVariable String roomId) {
         return "room";  // 返回 resources/templates/room.html
     }
+    
+    @GetMapping("/game-start")
+    public String gameStart() {
+        return "game-start"; // 對應 resources/templates/game-start.html
+    }
 
     @GetMapping("/game-introduction")
     public String gameIntroduction() {

@@ -5,10 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>房間頁面</title>
   <link rel="stylesheet" href="/css/room.css">
+  <style>
+    /* 可根據需求調整樣式 */
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    .header, .players-list, .footer {
+      margin-bottom: 20px;
+    }
+    .start-btn.active {
+      background-color: #28a745;
+      cursor: pointer;
+    }
+    .start-btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <!-- 頭部，顯示房間名稱與密碼 -->
+    <!-- 頭部：顯示房間名稱與密碼 -->
     <div class="header">
       <h1 class="room-name" id="room-name">房間名稱</h1>
       <span class="room-password" id="room-password"></span>
@@ -20,7 +39,7 @@
       <ul id="player-list"></ul>
     </div>
 
-    <!-- 底部按鈕區 -->
+    <!-- 底部按鈕：開始遊戲與退出房間 -->
     <div class="footer">
       <button id="start-game-btn" class="start-btn" disabled>開始遊戲</button>
       <button id="exit-room-btn" class="exit-btn">退出房間</button>
@@ -30,16 +49,18 @@
   <script>
     console.log("room.js loaded");
     let pollingInterval = null;
+    // 用來存放最新的玩家清單，供 startGame 判斷用
+    let currentPlayers = [];
 
-    // 當頁面 DOM 載入完成時執行
     document.addEventListener("DOMContentLoaded", () => {
       console.log("DOMContentLoaded triggered");
       loadRoomData();
       setupExitRoomButton();
       // 每隔 3 秒輪詢一次房間資料
-      pollingInterval = setInterval(() => {
-        loadRoomData();
-      }, 3000);
+      pollingInterval = setInterval(loadRoomData, 3000);
+
+      // 設定開始遊戲按鈕點擊事件
+      document.getElementById("start-game-btn").addEventListener("click", startGame);
     });
 
     async function loadRoomData() {
@@ -55,25 +76,27 @@
         const roomNameEl = document.getElementById("room-name");
         roomNameEl.textContent = room.roomName || "無房間名稱";
 
-        // 顯示或隱藏密碼
-        const roomPasswordElement = document.getElementById("room-password");
+        // 顯示或隱藏房間密碼
+        const roomPasswordEl = document.getElementById("room-password");
         if (room.roomPassword) {
-          roomPasswordElement.textContent = `密碼：${room.roomPassword}`;
-          roomPasswordElement.style.display = "block";
+          roomPasswordEl.textContent = `密碼：${room.roomPassword}`;
+          roomPasswordEl.style.display = "block";
         } else {
-          roomPasswordElement.style.display = "none";
+          roomPasswordEl.style.display = "none";
         }
 
         // 更新玩家列表
-        const playerList = document.getElementById("player-list");
+        const playerListEl = document.getElementById("player-list");
         const players = room.players || [];
-        playerList.innerHTML = players.map((player, index) => 
+        currentPlayers = players;
+        playerListEl.innerHTML = players.map((player, index) => 
           `<li>玩家 ${index + 1}: ${player || "等待加入"}</li>`
         ).join("");
 
         // 啟用或停用「開始遊戲」按鈕
         const startGameBtn = document.getElementById("start-game-btn");
-        if (players.length >= room.playerCount) {
+        // 條件：玩家數已達房間設定上限且當前使用者為房主（players[0]）
+        if (players.length >= room.playerCount && sessionStorage.getItem("playerName") === players[0]) {
           startGameBtn.disabled = false;
           startGameBtn.classList.add("active");
         } else {
@@ -89,7 +112,6 @@
     function setupExitRoomButton() {
       const exitRoomBtn = document.getElementById("exit-room-btn");
       exitRoomBtn.addEventListener("click", async () => {
-        // 取得玩家名稱，可從 sessionStorage 取得，或使用 prompt
         let playerName = sessionStorage.getItem("playerName");
         if (!playerName) {
           playerName = prompt("請輸入您的玩家名稱：");
@@ -110,6 +132,18 @@
           alert("退出房間失敗，請稍後再試！");
         }
       });
+    }
+
+    function startGame() {
+      const playerName = sessionStorage.getItem("playerName");
+      console.log("startGame() - 玩家名稱:", playerName, "房主:", currentPlayers[0]);
+      if (!currentPlayers || currentPlayers.length === 0 || playerName !== currentPlayers[0]) {
+        alert("只有房主可以開始遊戲！");
+        return;
+      }
+      // 停止輪詢，跳轉到遊戲開始畫面
+      if (pollingInterval) clearInterval(pollingInterval);
+      window.location.href = "/game-start";
     }
   </script>
 </body>

@@ -6,61 +6,46 @@
   <title>房間頁面</title>
   <link rel="stylesheet" href="/css/room.css">
   <style>
-    /* 可根據需求調整樣式 */
-    .container {
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 20px;
-    }
-    .header, .players-list, .footer {
-      margin-bottom: 20px;
-    }
-    .start-btn.active {
-      background-color: #28a745;
-      cursor: pointer;
-    }
-    .start-btn:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
+    /* 根據需求調整樣式 */
+    .container { max-width: 800px; margin: 20px auto; padding: 20px; }
+    .header, .players-list, .footer { margin-bottom: 20px; }
+    .start-btn.active { background-color: #28a745; cursor: pointer; }
+    .start-btn:disabled { background-color: #ccc; cursor: not-allowed; }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- 頭部：顯示房間名稱與密碼 -->
     <div class="header">
       <h1 class="room-name" id="room-name">房間名稱</h1>
       <span class="room-password" id="room-password"></span>
     </div>
-
-    <!-- 玩家列表 -->
     <div class="players-list">
       <h3>已加入玩家：</h3>
       <ul id="player-list"></ul>
     </div>
-
-    <!-- 底部按鈕：開始遊戲與退出房間 -->
     <div class="footer">
       <button id="start-game-btn" class="start-btn" disabled>開始遊戲</button>
       <button id="exit-room-btn" class="exit-btn">退出房間</button>
     </div>
   </div>
 
+  <!-- 引入 SockJS 與 Stomp.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
   <script>
     console.log("room.js loaded");
     let pollingInterval = null;
-    // 用來存放最新的玩家清單，供 startGame 判斷用
     let currentPlayers = [];
+    let stompClient = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       console.log("DOMContentLoaded triggered");
       loadRoomData();
       setupExitRoomButton();
-      // 每隔 3 秒輪詢一次房間資料
       pollingInterval = setInterval(loadRoomData, 3000);
-
-      // 設定開始遊戲按鈕點擊事件
       document.getElementById("start-game-btn").addEventListener("click", startGame);
+      connectWebSocket();
     });
 
     async function loadRoomData() {
@@ -72,11 +57,7 @@
         const room = await response.json();
         console.log("最新房間資料:", room);
 
-        // 更新房間名稱
-        const roomNameEl = document.getElementById("room-name");
-        roomNameEl.textContent = room.roomName || "無房間名稱";
-
-        // 顯示或隱藏房間密碼
+        document.getElementById("room-name").textContent = room.roomName || "無房間名稱";
         const roomPasswordEl = document.getElementById("room-password");
         if (room.roomPassword) {
           roomPasswordEl.textContent = `密碼：${room.roomPassword}`;
@@ -85,17 +66,14 @@
           roomPasswordEl.style.display = "none";
         }
 
-        // 更新玩家列表
         const playerListEl = document.getElementById("player-list");
         const players = room.players || [];
         currentPlayers = players;
-        playerListEl.innerHTML = players.map((player, index) => 
+        playerListEl.innerHTML = players.map((player, index) =>
           `<li>玩家 ${index + 1}: ${player || "等待加入"}</li>`
         ).join("");
 
-        // 啟用或停用「開始遊戲」按鈕
         const startGameBtn = document.getElementById("start-game-btn");
-        // 條件：玩家數已達房間設定上限且當前使用者為房主（players[0]）
         if (players.length >= room.playerCount && sessionStorage.getItem("playerName") === players[0]) {
           startGameBtn.disabled = false;
           startGameBtn.classList.add("active");
@@ -141,9 +119,33 @@
         alert("只有房主可以開始遊戲！");
         return;
       }
-      // 停止輪詢，跳轉到遊戲開始畫面
+      // 呼叫後端開始遊戲 API
+      const roomId = window.location.pathname.split("/").pop();
+      fetch(`/api/start-game?roomId=${roomId}&playerName=${encodeURIComponent(playerName)}`, { method: "POST" })
+      .then(response => response.json())
+      .then(data => {
+        console.log("start-game response:", data);
+      })
+      .catch(error => console.error("開始遊戲 API 發生錯誤:", error));
+      // 停止輪詢，等待 WebSocket 廣播觸發跳轉
       if (pollingInterval) clearInterval(pollingInterval);
-      window.location.href = "/game-start";
+    }
+
+    function connectWebSocket() {
+      const roomId = window.location.pathname.split("/").pop();
+      const socket = new SockJS('/ws');
+      stompClient = Stomp.over(socket);
+      stompClient.connect({}, function(frame) {
+        console.log("WebSocket connected: " + frame);
+        stompClient.subscribe('/topic/room/' + roomId, function(message) {
+          console.log("收到 WebSocket 訊息:", message.body);
+          if (message.body.trim() === "startGame") {
+            window.location.href = "/game-start";
+          }
+        });
+      }, function(error) {
+        console.error("WebSocket 連線錯誤:", error);
+      });
     }
   </script>
 </body>

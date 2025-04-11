@@ -5,6 +5,7 @@ import com.example.myweb.repositories.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -21,11 +22,13 @@ public class RoomController {
 
     @Autowired
     private RoomRepository roomRepository;
+
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
     
     @PostMapping("/create-room")
     public ResponseEntity<Object> createRoom(
             @RequestBody Room room, @RequestParam String playerName) {
-        // 將房間名稱加上「房間」後綴
         String formattedRoomName = room.getRoomName() + "房間";
         room.setRoomName(formattedRoomName);
         Optional<Room> existingRoom = roomRepository.findAll().stream()
@@ -41,7 +44,7 @@ public class RoomController {
         if (!"private".equals(room.getRoomType())) {
             room.setRoomPassword(null);
         }
-        // 將從前端傳入的 playerName（即登入存入 sessionStorage 的名稱）存入 players[0]
+        // 將登入玩家名稱作為房主存入 players[0]
         room.setPlayers(new ArrayList<>(Arrays.asList(playerName)));
         roomRepository.save(room);
     
@@ -72,7 +75,8 @@ public class RoomController {
         }
         Room room = roomOpt.get();
         
-        // 私人房間的密碼驗證由前端處理，這裡不再驗證
+        // 私人房間密碼驗證由前端處理，這裡不進行驗證
+        
         List<String> players = room.getPlayers();
         if (players.size() >= room.getPlayerCount()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("房間人數已滿");
@@ -106,10 +110,8 @@ public class RoomController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("該玩家不在房間中");
         }
         
-        // 移除該玩家（移除後陣列會自動前移）
         players.remove(playerName);
         
-        // 若房間內無玩家，則刪除房間；否則更新房間
         if (players.isEmpty()) {
             roomRepository.delete(room);
             Map<String, Object> resp = new HashMap<>();
@@ -123,5 +125,25 @@ public class RoomController {
             resp.put("message", "退出房間成功");
             return ResponseEntity.ok(resp);
         }
+    }
+    
+    @PostMapping(value = "/start-game", produces = "application/json")
+    public ResponseEntity<Object> startGame(@RequestParam String roomId, @RequestParam String playerName) {
+        Optional<Room> roomOpt = roomRepository.findById(roomId);
+        if (!roomOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("找不到房間");
+        }
+        Room room = roomOpt.get();
+        List<String> players = room.getPlayers();
+        // 檢查只有房主（players[0]）才能開始遊戲
+        if (players.isEmpty() || !players.get(0).equals(playerName)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("只有房主可以開始遊戲");
+        }
+        // 廣播 "startGame" 訊息給所有訂閱該房間頻道的客戶端
+        simpMessagingTemplate.convertAndSend("/topic/room/" + roomId, "startGame");
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("success", true);
+        resp.put("message", "遊戲開始訊息已廣播");
+        return ResponseEntity.ok(resp);
     }
 }

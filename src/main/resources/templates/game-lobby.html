@@ -18,19 +18,19 @@
             </div>
         </div>
 
-        <!-- 用戶資訊連結 -->
+                
         <div id="user-info-container">
-            <div class="dropdown">
-                <a href="javascript:void(0);" class="dropdown-btn">用戶資訊</a>
-                <div class="dropdown-content">
-                    <!-- 新增的選項 -->
-                    <a href="javascript:void(0);" onclick="location.href='/change-avatar'">更換頭貼</a>
-                    <a href="javascript:void(0);" onclick="location.href='/game-records'">遊戲紀錄</a>
-                    <!-- 登出選項 -->
-                    <a href="javascript:void(0);" onclick="logout()">登出</a>
-                </div>
-            </div>
+            <img src="/images/setting.png" alt="設定" class="setting-icon" onclick="toggleUserInfoPopup()">
         </div>
+
+        <!-- 用戶資訊小視窗 -->
+        <div id="user-info-popup" class="user-info-popup hidden">
+            <p>使用者名稱：<span id="username-display"></span></p>
+            <p><a href="/change-avatar">更換頭貼</a></p>
+            <p><a href="/game-records">查看遊戲紀錄</a></p>
+            <button onclick="logout()">登出</button>
+        </div>
+
     </div>
 
     

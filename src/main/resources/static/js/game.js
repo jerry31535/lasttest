@@ -68,7 +68,8 @@ function login() {
     .then(data => {
         if (data.success) {
             // 將玩家名稱存入 sessionStorage
-            sessionStorage.setItem("playerName", username);
+            localStorage.setItem("username", username);  // ✅ 必加
+            sessionStorage.setItem("username", username); // ⬅ 可選，若你有使用
             alert("登入成功！");
             window.location.href = '/game-lobby';
         } else {

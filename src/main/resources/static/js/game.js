@@ -80,4 +80,6 @@ function login() {
         console.error("登入錯誤:", error);
         alert("登入過程出錯");
     });
+    sessionStorage.setItem("playerName", username); // 👈 這行是關鍵
+
 }

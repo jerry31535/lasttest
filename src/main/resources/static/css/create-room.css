@@ -1,0 +1,76 @@
+body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background-color: #604646;
+    color: rgb(78, 117, 155);
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    background-image: url('/images/background.png');
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    height: 100vh;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 20px;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 36px;
+    color: #fdfafa;
+    margin-bottom: 10px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 300px;
+    margin-bottom: 15px;
+    color: #fdfafa;
+}
+
+.form-group label {
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+button {
+    width: 250px;
+    height: 50px;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: #8b0000;
+    color: #fdfafa;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #5e0c0c;
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}

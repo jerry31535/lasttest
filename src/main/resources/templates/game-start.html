@@ -5,54 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>遊戲開始</title>
   <link rel="stylesheet" href="/css/game-start.css">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f0f0f0;
-      padding-top: 50px;
-    }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h1 {
-      font-size: 36px;
-      margin-bottom: 20px;
-    }
-    p {
-      font-size: 18px;
-    }
-    .start-button {
-      margin-top: 30px;
-      padding: 10px 20px;
-      font-size: 18px;
-      background: #28a745;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .start-button:hover {
-      background: #218838;
-    }
-  </style>
 </head>
 <body>
   <div class="container">
     <h1>遊戲開始！</h1>
     <p>房主已開始遊戲，請所有玩家準備！</p>
+
+    <div class="avatar-selection">
+      <img src="/images/headshot1.png" class="avatar-option" data-avatar="headshot1.png">
+      <img src="/images/headshot2.png" class="avatar-option" data-avatar="headshot2.png">
+      <img src="/images/headshot3.png" class="avatar-option" data-avatar="headshot3.png">
+      <img src="/images/headshot4.png" class="avatar-option" data-avatar="headshot4.png">
+    </div>
+
     <button class="start-button" onclick="startGameNow()">開始遊戲</button>
   </div>
-  <script>
-    function startGameNow() {
-      alert("遊戲正式開始！");
-      window.location.href = "/game";
-    }
-  </script>
+
+  <script src="/js/game-start.js"></script>
 </body>
 </html>

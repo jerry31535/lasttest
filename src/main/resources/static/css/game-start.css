@@ -1,0 +1,40 @@
+.container {
+    text-align: center;
+    margin-top: 50px;
+  }
+  
+  .avatar-selection {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+  }
+  
+  .avatar-option {
+    width: 80px;
+    height: 80px;
+    border: 3px solid transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: border 0.3s;
+  }
+  
+  .avatar-option.selected {
+    border-color: red;
+  }
+  
+  .start-button {
+    padding: 10px 20px;
+    font-size: 18px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .start-button:hover {
+    background-color: #45a049;
+  }
+  

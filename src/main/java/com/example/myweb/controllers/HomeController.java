@@ -6,6 +6,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class HomeController {
+    @GetMapping("/game-start/{roomId}")
+    public String gameStart(@PathVariable String roomId) {
+        return "game-start";
+    }
+    
+    
+    @GetMapping("/game-play/{roomId}")
+public String gamePlay(@PathVariable String roomId) {
+    return "game-play"; // 對應 templates/game-play.html
+}
 
     @GetMapping("/")
     public String home() {
@@ -57,10 +67,6 @@ public class HomeController {
         return "room";  // 返回 resources/templates/room.html
     }
     
-    @GetMapping("/game-start")
-    public String gameStart() {
-        return "game-start"; // 對應 resources/templates/game-start.html
-    }
 
     @GetMapping("/game-introduction")
     public String gameIntroduction() {

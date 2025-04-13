@@ -1,20 +1,27 @@
 package com.example.myweb.controllers;
 
-import com.example.myweb.models.Room;
-import com.example.myweb.repositories.RoomRepository;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.HashMap;
-import java.util.Map;
+import com.example.myweb.models.Room;
+import com.example.myweb.repositories.RoomRepository;
 
 @RestController
 @RequestMapping("/api")
@@ -146,4 +153,53 @@ public class RoomController {
         resp.put("message", "遊戲開始訊息已廣播");
         return ResponseEntity.ok(resp);
     }
+    @PostMapping("/room/{roomId}/select-avatar")
+public ResponseEntity<?> selectAvatar(@PathVariable String roomId, @RequestBody Map<String, String> body) {
+    String playerName = body.get("playerName");
+    String avatar = body.get("avatar");
+
+    Optional<Room> roomOpt = roomRepository.findById(roomId);
+    if (!roomOpt.isPresent()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("房間不存在");
+    }
+    Room room = roomOpt.get();
+
+    if (!room.getPlayers().contains(playerName)) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("該玩家不在此房間");
+    }
+
+    // 記錄該玩家已選擇的頭貼
+    if (room.getAvatarMap() == null) {
+        room.setAvatarMap(new HashMap<>());
+    }
+    room.getAvatarMap().put(playerName, avatar);
+    roomRepository.save(room);
+
+    // 廣播 avatarSelected:playerName
+    simpMessagingTemplate.convertAndSend("/topic/room/" + roomId, "avatarSelected:" + playerName);
+
+    // 若全部人都已選好，廣播 allAvatarSelected
+    if (room.getAvatarMap().size() >= room.getPlayerCount()) {
+        simpMessagingTemplate.convertAndSend("/topic/room/" + roomId, "allAvatarSelected");
+    }
+
+    return ResponseEntity.ok().build();
+}
+@PostMapping("/start-real-game")
+public ResponseEntity<?> startRealGame(@RequestParam String roomId, @RequestParam String playerName) {
+    Optional<Room> roomOpt = roomRepository.findById(roomId);
+    if (!roomOpt.isPresent()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("房間不存在");
+    }
+    Room room = roomOpt.get();
+
+    if (room.getPlayers().isEmpty() || !room.getPlayers().get(0).equals(playerName)) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("只有房主可以開始遊戲");
+    }
+
+    // 廣播 startRealGame
+    simpMessagingTemplate.convertAndSend("/topic/room/" + roomId, "startRealGame");
+    return ResponseEntity.ok().build();
+}
+
 }

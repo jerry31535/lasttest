@@ -6,7 +6,6 @@
   <title>房間頁面</title>
   <link rel="stylesheet" href="/css/room.css">
   <style>
-    /* 根據需求調整樣式 */
     .container { max-width: 800px; margin: 20px auto; padding: 20px; }
     .header, .players-list, .footer { margin-bottom: 20px; }
     .start-btn.active { background-color: #28a745; cursor: pointer; }
@@ -29,7 +28,7 @@
     </div>
   </div>
 
-  <!-- 引入 SockJS 與 Stomp.js -->
+  <!-- WebSocket 套件 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
@@ -39,23 +38,22 @@
     let currentPlayers = [];
     let stompClient = null;
 
+    const roomId = window.location.pathname.split("/").pop();
+
     document.addEventListener("DOMContentLoaded", () => {
-      console.log("DOMContentLoaded triggered");
       loadRoomData();
       setupExitRoomButton();
-      pollingInterval = setInterval(loadRoomData, 3000);
       document.getElementById("start-game-btn").addEventListener("click", startGame);
+      pollingInterval = setInterval(loadRoomData, 3000);
       connectWebSocket();
     });
 
     async function loadRoomData() {
-      const roomId = window.location.pathname.split("/").pop();
       console.log("Polling room data for roomId:", roomId);
       try {
         const response = await fetch(`/api/room/${roomId}`, { cache: "no-cache" });
         if (!response.ok) throw new Error("無法獲取房間資料");
         const room = await response.json();
-        console.log("最新房間資料:", room);
 
         document.getElementById("room-name").textContent = room.roomName || "無房間名稱";
         const roomPasswordEl = document.getElementById("room-password");
@@ -74,7 +72,8 @@
         ).join("");
 
         const startGameBtn = document.getElementById("start-game-btn");
-        if (players.length >= room.playerCount && sessionStorage.getItem("playerName") === players[0]) {
+        const playerName = sessionStorage.getItem("playerName");
+        if (players.length >= room.playerCount && playerName === players[0]) {
           startGameBtn.disabled = false;
           startGameBtn.classList.add("active");
         } else {
@@ -97,7 +96,6 @@
           sessionStorage.setItem("playerName", playerName);
         }
         try {
-          const roomId = window.location.pathname.split("/").pop();
           const response = await fetch(`/api/exit-room?roomId=${roomId}&playerName=${encodeURIComponent(playerName)}`, {
             method: "POST"
           });
@@ -119,31 +117,32 @@
         alert("只有房主可以開始遊戲！");
         return;
       }
-      // 呼叫後端開始遊戲 API
-      const roomId = window.location.pathname.split("/").pop();
+
       fetch(`/api/start-game?roomId=${roomId}&playerName=${encodeURIComponent(playerName)}`, { method: "POST" })
-      .then(response => response.json())
-      .then(data => {
-        console.log("start-game response:", data);
-      })
-      .catch(error => console.error("開始遊戲 API 發生錯誤:", error));
-      // 停止輪詢，等待 WebSocket 廣播觸發跳轉
+        .then(response => response.json())
+        .then(data => {
+          console.log("start-game response:", data);
+        })
+        .catch(error => console.error("開始遊戲 API 發生錯誤:", error));
+
       if (pollingInterval) clearInterval(pollingInterval);
     }
 
     function connectWebSocket() {
-      const roomId = window.location.pathname.split("/").pop();
       const socket = new SockJS('/ws');
       stompClient = Stomp.over(socket);
-      stompClient.connect({}, function(frame) {
+
+      stompClient.connect({}, function (frame) {
         console.log("WebSocket connected: " + frame);
-        stompClient.subscribe('/topic/room/' + roomId, function(message) {
-          console.log("收到 WebSocket 訊息:", message.body);
-          if (message.body.trim() === "startGame") {
-            window.location.href = "/game-start";
+        stompClient.subscribe(`/topic/room/${roomId}`, function (message) {
+          const msg = message.body.trim();
+          console.log("收到 WebSocket 訊息:", msg);
+          if (msg === "startGame") {
+            console.log("跳轉到：", `/game-start/${roomId}`);
+            window.location.href = `/game-start/${roomId}`;
           }
         });
-      }, function(error) {
+      }, function (error) {
         console.error("WebSocket 連線錯誤:", error);
       });
     }

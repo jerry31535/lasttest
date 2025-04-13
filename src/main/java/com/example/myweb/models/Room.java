@@ -1,11 +1,12 @@
 package com.example.myweb.models;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.util.ArrayList;
-import java.util.List;
-
 @Document(collection = "rooms")
 public class Room {
     @Id
@@ -15,7 +16,15 @@ public class Room {
     private String roomType;
     private String roomPassword;
     private List<String> players = new ArrayList<>(); // 新增 players 欄位
-
+    private Map<String, String> avatarMap = new HashMap<>(); // 玩家名稱 → 頭像名稱
+    public Map<String, String> getAvatarMap() {
+        return avatarMap;
+    }
+    
+    public void setAvatarMap(Map<String, String> avatarMap) {
+        this.avatarMap = avatarMap;
+    }
+    
     // Getter 和 Setter
     public String getId() {
         return id;

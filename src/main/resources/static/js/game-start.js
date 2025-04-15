@@ -4,29 +4,41 @@ const roomId = window.location.pathname.split("/").pop();
 let stompClient = null;
 let allPlayersSelected = false;
 
-// 🧠 玩家選擇頭像，儲存並通知後端
+// 🧠 玩家選擇頭像，只改樣式與暫存資料（不發送）
 avatarImages.forEach(img => {
-  img.addEventListener('click', async () => {
+  img.addEventListener('click', () => {
     avatarImages.forEach(i => i.classList.remove('selected'));
     img.classList.add('selected');
 
     const selectedAvatar = img.getAttribute('data-avatar');
     localStorage.setItem('selectedAvatar', selectedAvatar);
-
-    const playerName = sessionStorage.getItem("playerName");
-    if (!playerName) return;
-
-    try {
-      await fetch(`/api/room/${roomId}/select-avatar`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ playerName, avatar: selectedAvatar })
-      });
-    } catch (err) {
-      console.error("❌ 選擇頭像失敗:", err);
-    }
   });
 });
+
+// 🧠 玩家確認頭貼時才送出
+function confirmAvatar() {
+  const selectedAvatar = localStorage.getItem("selectedAvatar");
+  if (!selectedAvatar) {
+    alert("請先選擇頭貼！");
+    return;
+  }
+
+  const playerName = sessionStorage.getItem("playerName");
+  if (!playerName) {
+    alert("尚未登入！");
+    return;
+  }
+
+  fetch(`/api/room/${roomId}/select-avatar`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ playerName, avatar: selectedAvatar })
+  }).then(() => {
+    alert("頭貼確認完成，請等待其他玩家");
+  }).catch(err => {
+    console.error("❌ 確認頭貼失敗:", err);
+  });
+}
 
 // 🧠 房主手動觸發開始遊戲
 function startGameNow() {
@@ -41,7 +53,7 @@ function startGameNow() {
   });
 }
 
-// 🧠 連接 WebSocket，監聽頭貼選擇進度與遊戲開始訊號
+// 🧠 WebSocket 監聽訊息
 function connectWebSocket() {
   const socket = new SockJS('/ws');
   stompClient = Stomp.over(socket);

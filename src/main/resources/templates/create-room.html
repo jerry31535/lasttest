@@ -1,62 +1,47 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <title>創建遊戲房間</title>
-    <link rel="stylesheet" href="/css/create-room.css">
-    <script src="/js/create-room.js" defer></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const roomTypeSelect = document.getElementById("room-type");
-            const passwordContainer = document.getElementById("password-container");
-            roomTypeSelect.addEventListener("change", function () {
-                if (roomTypeSelect.value === "private") {
-                    passwordContainer.style.display = "block";
-                } else {
-                    passwordContainer.style.display = "none";
-                }
-            });
-        });
-    </script>
-    
+  <meta charset="UTF-8">
+  <title>創建房間 v2</title>
+  <link rel="stylesheet" href="/css/create-room.css">
+  <script src="/js/create-room.js" defer></script>
 </head>
 <body>
-    <div class="container">
-        <h1>創建遊戲房間</h1>
+  <div class="container">
+    <img src="/images/title8.png" alt="房間選擇" id="title">
 
-        <div class="form-group">
-            <label for="room-name">房間名稱：</label>
-            <input type="text" id="room-name" placeholder="請輸入房間名稱">
-        </div>
-
-        <!-- 移除創建玩家名稱輸入欄位，因為會從 sessionStorage 取得 -->
-
-        <div class="form-group">
-            <label>房間類型：</label>
-            <select id="room-type">
-                <option value="public">公開</option>
-                <option value="private">私人</option>
-            </select>
-        </div>
-
-        <div class="form-group" id="password-container" style="display: none;">
-            <label for="room-password">房間密碼：</label>
-            <input type="password" id="room-password" placeholder="請輸入密碼">
-        </div>
-
-        <div class="form-group">
-            <label for="player-count">遊戲人數：</label>
-            <select id="player-count">
-                <script>
-                    for (let i = 5; i <= 10; i++) {
-                        document.write(`<option value="${i}">${i} 人</option>`);
-                    }
-                </script>
-            </select>
-        </div>
-
-        <button onclick="createRoom()">創建房間</button>
-        <button onclick="goBack()">返回</button>
+    <div class="form-group">
+      <label for="room-name">房間名稱：</label>
+      <input type="text" id="room-name" placeholder="請輸入房間名稱">
     </div>
+
+    <div class="form-group">
+      <label>房間類型：</label>
+      <select id="room-type">
+        <option value="public">公開</option>
+        <option value="private">私人</option>
+      </select>
+    </div>
+
+    <div class="form-group" id="password-container">
+      <label for="room-password">房間密碼：</label>
+      <input type="password" id="room-password" placeholder="請輸入密碼">
+    </div>
+
+    <div class="form-group">
+      <label for="player-count">遊戲人數：</label>
+      <select id="player-count">
+        <script>
+          for (let i = 5; i <= 10; i++) {
+            document.write(`<option value="${i}">${i} 人</option>`);
+          }
+        </script>
+      </select>
+    </div>
+
+    <button onclick="createRoom()">創建房間</button>
+    <button onclick="goBack()" id="back-button">返回</button>
+
+  </div>
 </body>
 </html>

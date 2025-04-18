@@ -34,7 +34,7 @@ function register() {
     .then(data => {
         if (data.success) {
             alert("註冊成功！");
-            showLoginForm(); // 顯示登入表單
+            showLoginForm(); 
         } else {
             alert(data.message || "註冊失敗！");
         }

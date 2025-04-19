@@ -66,14 +66,14 @@ function connectWebSocket() {
       if (msg === "allAvatarSelected") {
         allPlayersSelected = true;
         console.log("✅ 所有玩家已選好，跳轉正式遊戲");
-        window.location.href = `/game-play/${roomId}`;
+        window.location.href = `/5player-front-page.html?roomId=${roomId}`;
       }
-
+      
       if (msg === "startRealGame") {
         console.log("✅ 房主已觸發正式開始");
-        window.location.href = `/game-play/${roomId}`;
+        window.location.href = `/5player-front-page.html?roomId=${roomId}`;
       }
-
+      
       if (msg.startsWith("avatarSelected:")) {
         const name = msg.split(":")[1];
         console.log(`✅ ${name} 已選擇頭貼`);

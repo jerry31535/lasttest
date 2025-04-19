@@ -12,11 +12,7 @@ public class HomeController {
     }
     
     
-    @GetMapping("/game-play/{roomId}")
-public String gamePlay(@PathVariable String roomId) {
-    return "game-play"; // 對應 templates/game-play.html
-}
-
+ 
     @GetMapping("/")
     public String home() {
         return "index"; // 對應 resources/templates/index.html

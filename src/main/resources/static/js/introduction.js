@@ -7,7 +7,7 @@ const characters = [
     { img: "/images/badpeople1.png", info: " 潛伏者<br>可偷偷更改提交的資源卡。" },
     { img: "/images/badpeople2.png", info: " 破壞者<br>可使一張資源卡失效<br>限用兩次。" },
     { img: "/images/badpeople3.png", info: " 影武者<br>可偽裝身份並並展示假身份。" },
-    { img: "/images/goodpeople1.png", info: " 邪惡平民<br>無特殊能力<br>但可協助邪惡方勝利。" }
+    { img: "/images/goodpeople4.png", info: " 邪惡平民<br>無特殊能力<br>但可協助邪惡方勝利。" }
 ];
 
 // ✅ 確保變數先定義，避免 `window.onload` 時 `currentIndex` 未定義

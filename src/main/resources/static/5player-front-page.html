@@ -8,16 +8,23 @@
 <body>
   <div class="top-left">第 1 輪</div>
   <div class="top-right">
-    <img src="images/setting.png" alt="設定" class="icon" />
+    <img src="/images/setting.png" alt="設定" class="icon" />
   </div>
 
-  <div class="player-circle" id="player-container">
-    <!-- 玩家卡牌會由 JS 動態插入 -->
-  </div>
+  <div class="player-circle" id="player-container"></div>
 
   <div class="bottom-left">目前收集到 n 個資源</div>
   <div class="bottom-right">
-    <img src="images/chat.png" alt="聊天室" class="icon" />
+    <img src="/images/chat.png" alt="聊天室" class="icon" />
+  </div>
+
+  <!-- 彈窗 -->
+  <div id="role-popup" class="popup hidden">
+    <div class="popup-content">
+      <h2 id="role-title"></h2>
+      <img id="role-image" src="" alt="角色圖片">
+      <button onclick="closeRolePopup()">關閉</button>
+    </div>
   </div>
 
   <script src="/js/5player-front-page.js"></script>

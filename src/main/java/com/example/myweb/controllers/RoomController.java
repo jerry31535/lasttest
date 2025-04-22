@@ -21,19 +21,17 @@ public class RoomController {
     private SimpMessagingTemplate simpMessagingTemplate;
 
     @PostMapping("/create-room")
-    public ResponseEntity<Object> createRoom(
-            @RequestBody Room room, @RequestParam String playerName) {
-
+    public ResponseEntity<Object> createRoom(@RequestBody Room room, @RequestParam String playerName) {
         String formattedRoomName = room.getRoomName() + "房間";
         room.setRoomName(formattedRoomName);
 
         Optional<Room> existingRoom = roomRepository.findAll().stream()
-                .filter(r -> r.getRoomName().equals(room.getRoomName()))
-                .findFirst();
+            .filter(r -> r.getRoomName().equals(room.getRoomName()))
+            .findFirst();
 
         if (existingRoom.isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("房間名稱已存在，請選擇其他名稱！");
+                .body("房間名稱已存在，請選擇其他名稱！");
         }
 
         room.setId(UUID.randomUUID().toString());
@@ -51,7 +49,7 @@ public class RoomController {
     public ResponseEntity<Room> getRoomById(@PathVariable String roomId) {
         Optional<Room> room = roomRepository.findById(roomId);
         return room.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+            .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
 
     @GetMapping("/rooms")
@@ -61,10 +59,10 @@ public class RoomController {
 
     @PostMapping("/join-room")
     public ResponseEntity<Object> joinRoom(
-            @RequestParam String roomId,
-            @RequestParam String playerName,
-            @RequestParam(required = false) String roomPassword) {
-
+        @RequestParam String roomId,
+        @RequestParam String playerName,
+        @RequestParam(required = false) String roomPassword
+    ) {
         Optional<Room> roomOpt = roomRepository.findById(roomId);
         if (!roomOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("找不到房間");
@@ -84,17 +82,17 @@ public class RoomController {
         players.add(playerName);
         roomRepository.save(room);
 
-        Map<String, Object> resp = new HashMap<>();
-        resp.put("success", true);
-        resp.put("message", "加入房間成功");
-        return ResponseEntity.ok(resp);
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "加入房間成功"
+        ));
     }
 
     @PostMapping("/exit-room")
     public ResponseEntity<Object> exitRoom(
-            @RequestParam String roomId,
-            @RequestParam String playerName) {
-
+        @RequestParam String roomId,
+        @RequestParam String playerName
+    ) {
         Optional<Room> roomOpt = roomRepository.findById(roomId);
         if (!roomOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("找不到房間");
@@ -113,7 +111,7 @@ public class RoomController {
             roomRepository.delete(room);
             return ResponseEntity.ok(Map.of(
                 "success", true,
-                "message", "退出房間成功，房間已刪除，因為沒有其他玩家"
+                "message", "退出房間成功，房間已刪除"
             ));
         } else {
             roomRepository.save(room);
@@ -160,6 +158,7 @@ public class RoomController {
         if (room.getAvatarMap() == null) {
             room.setAvatarMap(new HashMap<>());
         }
+
         room.getAvatarMap().put(playerName, avatar);
         roomRepository.save(room);
 
@@ -173,23 +172,53 @@ public class RoomController {
     }
 
     @PostMapping("/start-real-game")
-    public ResponseEntity<?> startRealGame(@RequestParam String roomId, @RequestParam String playerName) {
-        Optional<Room> roomOpt = roomRepository.findById(roomId);
-        if (!roomOpt.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("房間不存在");
-        }
-
-        Room room = roomOpt.get();
-
-        if (room.getPlayers().isEmpty() || !room.getPlayers().get(0).equals(playerName)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("只有房主可以開始遊戲");
-        }
-
-        simpMessagingTemplate.convertAndSend("/topic/room/" + roomId, "startRealGame");
-        return ResponseEntity.ok().build();
+public ResponseEntity<Map<String, Room.RoleInfo>> startRealGame(@RequestParam String roomId, @RequestParam String playerName) {
+    Optional<Room> roomOpt = roomRepository.findById(roomId);
+    if (!roomOpt.isPresent()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
-    // ✅ 修正過的：移除多餘 /api，這樣前端才能正確 call
+    Room room = roomOpt.get();
+
+    // ✅ 防止重複分配
+    if (room.getAssignedRoles() != null && !room.getAssignedRoles().isEmpty()) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(room.getAssignedRoles());
+    }
+
+    List<String> players = new ArrayList<>(room.getPlayers());
+
+    // ✅ 改成可變 List 才能 shuffle
+    List<Room.RoleInfo> roles = new ArrayList<>(Arrays.asList(
+        new Room.RoleInfo("工程師", "goodpeople1.png"),
+        new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
+        new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
+        new Room.RoleInfo("潛伏者", "badpeople1.png"),
+        new Room.RoleInfo("邪惡平民", "badpeople4.png")
+    ));
+
+    // ✅ 防呆：角色數 ≠ 玩家數 → 報錯
+    if (roles.size() != players.size()) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(Map.of("error", new Room.RoleInfo("錯誤", "角色數量與玩家人數不符")));
+    }
+
+    Collections.shuffle(players);
+    Collections.shuffle(roles);
+
+    Map<String, Room.RoleInfo> assigned = new HashMap<>();
+    for (int i = 0; i < players.size(); i++) {
+        assigned.put(players.get(i), roles.get(i));
+    }
+
+    room.setAssignedRoles(assigned);
+    roomRepository.save(room);
+
+    simpMessagingTemplate.convertAndSend("/topic/room/" + roomId, "startRealGame");
+
+    return ResponseEntity.ok(assigned);
+}
+
+
     @GetMapping("/room/{roomId}/players")
     public ResponseEntity<List<Map<String, String>>> getAllPlayers(@PathVariable String roomId) {
         Optional<Room> roomOpt = roomRepository.findById(roomId);
@@ -209,5 +238,12 @@ public class RoomController {
         }
 
         return ResponseEntity.ok(players);
+    }
+
+    @GetMapping("/room/{roomId}/roles")
+    public ResponseEntity<Map<String, Room.RoleInfo>> getAssignedRoles(@PathVariable String roomId) {
+        return roomRepository.findById(roomId)
+            .map(room -> ResponseEntity.ok(room.getAssignedRoles()))
+            .orElse(ResponseEntity.notFound().build());
     }
 }

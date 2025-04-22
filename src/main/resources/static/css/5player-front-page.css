@@ -121,3 +121,33 @@ body {
 .hidden {
   display: none;
 }
+
+.role-popup {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  border: 2px solid #333;
+  padding: 20px;
+  z-index: 9999;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+
+.role-popup.hidden {
+  display: none;
+}
+
+.role-popup .popup-content h2 {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+.role-image {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  margin-bottom: 15px;
+}

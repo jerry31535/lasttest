@@ -1,6 +1,9 @@
-const urlParams = new URLSearchParams(window.location.search);
+const urlParams = new URLSearchParams(window.location.search);  
 const roomId = urlParams.get("roomId");
 const playerName = sessionStorage.getItem("playerName");
+
+let players = [];
+let myRole = null;
 
 const positions = [
   { top: '3%', left: '55%' },
@@ -10,34 +13,37 @@ const positions = [
   { bottom: '30px', left: '50%', transform: 'translateX(-50%)' }
 ];
 
-let myRole = null;
-
 async function fetchPlayers() {
   try {
     const response = await fetch(`/api/room/${roomId}/players`);
-    const players = await response.json();
-    assignRoles(players);
+    players = await response.json();
+    renderPlayers(players);
   } catch (err) {
     console.error("❌ 無法載入玩家資料", err);
   }
 }
 
-function assignRoles(players) {
-  const roles = [
-    { name: "工程師", image: "goodpeople1.png" },
-    { name: "普通倖存者", image: "goodpeople4.png" },
-    { name: "普通倖存者", image: "goodpeople4.png" },
-    { name: "潛伏者", image: "badpeople1.png" },
-    { name: "邪惡平民", image: "badpeople4.png" }
-  ];
+async function fetchAssignedRoles() {
+  try {
+    const response = await fetch(`/api/room/${roomId}/players`);
+    players = await response.json();
 
-  // 🔀 把角色與玩家都打亂
-  shuffle(roles);
-  shuffle(players);
+    const roleRes = await fetch(`/api/room/${roomId}/roles`);
+    if (!roleRes.ok) throw new Error("角色 API 失敗");
 
-  const assigned = players.map((p, i) => ({
+    const rolesMap = await roleRes.json();
+    console.log("🎭 從資料庫取得角色資訊", rolesMap);
+
+    applyRolesToPlayers(rolesMap);
+  } catch (err) {
+    console.error("❌ 無法取得角色資料", err);
+  }
+}
+
+function applyRolesToPlayers(rolesMap) {
+  const assigned = players.map(p => ({
     ...p,
-    role: roles[i]
+    role: rolesMap[p.name]
   }));
 
   renderPlayers(assigned);
@@ -45,15 +51,7 @@ function assignRoles(players) {
   const self = assigned.find(p => p.name === playerName);
   if (self) {
     myRole = self.role;
-    setTimeout(showRolePopup, 5000);
-  }
-}
-
-
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+    console.log("👤 我的角色是：", myRole);
   }
 }
 
@@ -75,25 +73,35 @@ function renderPlayers(players) {
         <img src="/images/${player.avatar}" alt="${player.name}">
       </div>
       <div class="name">${player.name}</div>
-      ${isSelf ? `<div class="role-label" id="my-role-label"></div>` : ""}
+      ${
+        isSelf && player.role
+          ? `<div class="role-label">角色：${player.role.name}</div>`
+          : ""
+      }
     `;
 
     container.appendChild(card);
   });
 }
 
-function showRolePopup() {
-  document.getElementById("role-title").textContent = `你是 ${myRole.name}`;
-  document.getElementById("role-image").src = `/images/${myRole.image}`;
-  document.getElementById("role-popup").classList.remove("hidden");
+function connectWebSocket() {
+  const socket = new SockJS('/ws');
+  const stompClient = Stomp.over(socket);
+
+  stompClient.connect({}, () => {
+    stompClient.subscribe(`/topic/room/${roomId}`, async (message) => {
+      const msg = message.body.trim();
+      console.log("🛰️ WebSocket:", msg);
+
+      if (msg === "startRealGame") {
+        await fetchAssignedRoles(); // 收到後端廣播 → 撈角色
+      }
+    });
+  });
 }
 
-function closeRolePopup() {
-  document.getElementById("role-popup").classList.add("hidden");
-  const label = document.getElementById("my-role-label");
-  if (label && myRole) {
-    label.textContent = `角色：${myRole.name}`;
-  }
-}
-
-document.addEventListener("DOMContentLoaded", fetchPlayers);
+document.addEventListener("DOMContentLoaded", async () => {
+  await fetchPlayers();            // 預先抓一次玩家（含頭貼）
+  await fetchAssignedRoles();     // 抓角色顯示自己角色
+  connectWebSocket();             // 監聽跳轉事件
+});

@@ -5,6 +5,10 @@ body {
   position: relative;
   height: 100vh;
   background-color: #f0f0f0;
+  background-image: url('/images/game-background.png'); /* 加這行 */
+  background-size: cover;           /* 讓圖片撐滿整個畫面 */
+  background-position: center;      /* 居中對齊 */
+  background-repeat: no-repeat;     /* 不重複鋪排 */
 }
 
 .top-left {
@@ -47,17 +51,20 @@ body {
 
 .player-card, .player-self {
   position: absolute;
-  width: 140px;
-  height: 196px;
-  background-color: white;
-  border: 2px solid black;
+  width: 157px;
+  height: 200px;
+  background-image: url('/images/card.png');  /* 套用卡牌背景 */
+  background-size: cover;                     /* 背景撐滿整張卡牌 */
+  background-position: center;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding-top: 10px;
   text-align: center;
+  border: none;                               /* 移除黑邊 */
 }
+
 
 .avatar {
   width: 100px;

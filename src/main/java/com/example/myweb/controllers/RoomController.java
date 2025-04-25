@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.myweb.dto.AvatarSelectionRequest;
 import com.example.myweb.models.Room;
 import com.example.myweb.repositories.RoomRepository;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -54,9 +55,12 @@ public class RoomController {
 
     @GetMapping("/rooms")
     public ResponseEntity<List<Room>> getAllRooms() {
-        return ResponseEntity.ok(roomRepository.findAll());
+        List<Room> rooms = roomRepository.findAll()
+            .stream()
+            .filter(r -> !r.isStarted())         // 只留 started == false
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(rooms);
     }
-
     @PostMapping("/join-room")
     public ResponseEntity<Object> joinRoom(
         @RequestParam String roomId,
@@ -135,7 +139,8 @@ public class RoomController {
         if (players.isEmpty() || !players.get(0).equals(playerName)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("只有房主可以開始遊戲");
         }
-
+        room.setStarted(true);
+        roomRepository.save(room);
         simpMessagingTemplate.convertAndSend("/topic/room/" + roomId, "startGame");
         return ResponseEntity.ok(Map.of("success", true, "message", "遊戲開始訊息已廣播"));
     }

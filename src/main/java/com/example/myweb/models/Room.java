@@ -1,12 +1,12 @@
 package com.example.myweb.models;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "rooms")
 public class Room {
@@ -20,6 +20,9 @@ public class Room {
     private List<String> players = new ArrayList<>();              // 玩家名稱列表
     private Map<String, String> avatarMap = new HashMap<>();       // 玩家名稱 → 頭貼圖片名稱
     private Map<String, RoleInfo> assignedRoles = new HashMap<>(); // 玩家名稱 → 角色資訊
+
+    // 新增：遊戲是否已經開始
+    private boolean started = false;
 
     // ---------- Getter / Setter ----------
 
@@ -79,13 +82,19 @@ public class Room {
         this.assignedRoles = assignedRoles;
     }
 
-    // ---------- 角色資訊內部類 ----------
+    public boolean isStarted() {
+        return started;
+    }
+    public void setStarted(boolean started) {
+        this.started = started;
+    }
 
+    // ---------- 角色資訊內部類 ----------
     public static class RoleInfo {
         private String name;
         private String image;
 
-        public RoleInfo() {} // 給 Spring 使用
+        public RoleInfo() {} // Spring 使用
 
         public RoleInfo(String name, String image) {
             this.name = name;

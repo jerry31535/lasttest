@@ -28,7 +28,7 @@
     </div>
   </div>
 
-  <!-- WebSocket 套件 -->
+  <!-- SockJS & STOMP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
@@ -37,113 +37,99 @@
     let pollingInterval = null;
     let currentPlayers = [];
     let stompClient = null;
-
     const roomId = window.location.pathname.split("/").pop();
 
     document.addEventListener("DOMContentLoaded", () => {
       loadRoomData();
       setupExitRoomButton();
-      document.getElementById("start-game-btn").addEventListener("click", startGame);
+      document.getElementById("start-game-btn")
+              .addEventListener("click", startGame);
       pollingInterval = setInterval(loadRoomData, 3000);
       connectWebSocket();
+
+      // 在關閉分頁或跳轉前，自動發送退出請求
+      window.addEventListener("beforeunload", () => {
+        const playerName = sessionStorage.getItem("playerName");
+        if (playerName) {
+          const url = `/api/exit-room?roomId=${roomId}&playerName=${encodeURIComponent(playerName)}`;
+          navigator.sendBeacon(url);
+        }
+      });
     });
 
     async function loadRoomData() {
       console.log("Polling room data for roomId:", roomId);
       try {
-        const response = await fetch(`/api/room/${roomId}`, { cache: "no-cache" });
-        if (!response.ok) throw new Error("無法獲取房間資料");
-        const room = await response.json();
+        const res = await fetch(`/api/room/${roomId}`, { cache: "no-cache" });
+        if (!res.ok) throw new Error();
+        const room = await res.json();
 
-        document.getElementById("room-name").textContent = room.roomName || "無房間名稱";
-        const roomPasswordEl = document.getElementById("room-password");
+        document.getElementById("room-name").textContent = room.roomName;
+        const pwdEl = document.getElementById("room-password");
         if (room.roomPassword) {
-          roomPasswordEl.textContent = `密碼：${room.roomPassword}`;
-          roomPasswordEl.style.display = "block";
+          pwdEl.textContent = `密碼：${room.roomPassword}`;
+          pwdEl.style.display = "block";
         } else {
-          roomPasswordEl.style.display = "none";
+          pwdEl.style.display = "none";
         }
 
-        const playerListEl = document.getElementById("player-list");
         const players = room.players || [];
         currentPlayers = players;
-        playerListEl.innerHTML = players.map((player, index) =>
-          `<li>玩家 ${index + 1}: ${player || "等待加入"}</li>`
-        ).join("");
+        document.getElementById("player-list").innerHTML =
+          players.map((p,i) => `<li>玩家 ${i+1}: ${p || "等待加入"}</li>`).join("");
 
-        const startGameBtn = document.getElementById("start-game-btn");
-        const playerName = sessionStorage.getItem("playerName");
-        if (players.length >= room.playerCount && playerName === players[0]) {
-          startGameBtn.disabled = false;
-          startGameBtn.classList.add("active");
+        const startBtn = document.getElementById("start-game-btn");
+        const me = sessionStorage.getItem("playerName");
+        if (players.length >= room.playerCount && me === players[0]) {
+          startBtn.disabled = false;
+          startBtn.classList.add("active");
         } else {
-          startGameBtn.disabled = true;
-          startGameBtn.classList.remove("active");
+          startBtn.disabled = true;
+          startBtn.classList.remove("active");
         }
-      } catch (error) {
-        console.error("加載房間資料時發生錯誤:", error);
-        alert("無法加載房間資料，請稍後再試！");
+      } catch (e) {
+        console.error("加載房間資料失敗:", e);
       }
     }
 
     function setupExitRoomButton() {
-      const exitRoomBtn = document.getElementById("exit-room-btn");
-      exitRoomBtn.addEventListener("click", async () => {
-        let playerName = sessionStorage.getItem("playerName");
-        if (!playerName) {
-          playerName = prompt("請輸入您的玩家名稱：");
-          if (!playerName) return;
-          sessionStorage.setItem("playerName", playerName);
+      document.getElementById("exit-room-btn").addEventListener("click", async () => {
+        clearInterval(pollingInterval);
+        const playerName = sessionStorage.getItem("playerName");
+        if (playerName) {
+          await fetch(
+            `/api/exit-room?roomId=${roomId}&playerName=${encodeURIComponent(playerName)}`,
+            { method: "POST" }
+          );
         }
-        try {
-          const response = await fetch(`/api/exit-room?roomId=${roomId}&playerName=${encodeURIComponent(playerName)}`, {
-            method: "POST"
-          });
-          const result = await response.json();
-          alert(result.message || "退出房間成功");
-          if (pollingInterval) clearInterval(pollingInterval);
-          window.location.href = "/game-lobby";
-        } catch (error) {
-          console.error("退出房間時發生錯誤:", error);
-          alert("退出房間失敗，請稍後再試！");
-        }
+        window.location.href = "/game-lobby";
       });
     }
 
     function startGame() {
-      const playerName = sessionStorage.getItem("playerName");
-      console.log("startGame() - 玩家名稱:", playerName, "房主:", currentPlayers[0]);
-      if (!currentPlayers || currentPlayers.length === 0 || playerName !== currentPlayers[0]) {
-        alert("只有房主可以開始遊戲！");
-        return;
+      const me = sessionStorage.getItem("playerName");
+      if (!currentPlayers.length || me !== currentPlayers[0]) {
+        return alert("只有房主可以開始遊戲！");
       }
-
-      fetch(`/api/start-game?roomId=${roomId}&playerName=${encodeURIComponent(playerName)}`, { method: "POST" })
-        .then(response => response.json())
-        .then(data => {
-          console.log("start-game response:", data);
-        })
-        .catch(error => console.error("開始遊戲 API 發生錯誤:", error));
-
-      if (pollingInterval) clearInterval(pollingInterval);
+      fetch(`/api/start-game?roomId=${roomId}&playerName=${encodeURIComponent(me)}`, {
+        method: "POST"
+      });
+      clearInterval(pollingInterval);
+      // 不立即跳轉，等 WebSocket 廣播觸發
     }
 
     function connectWebSocket() {
       const socket = new SockJS('/ws');
       stompClient = Stomp.over(socket);
-
-      stompClient.connect({}, function (frame) {
-        console.log("WebSocket connected: " + frame);
-        stompClient.subscribe(`/topic/room/${roomId}`, function (message) {
-          const msg = message.body.trim();
-          console.log("收到 WebSocket 訊息:", msg);
-          if (msg === "startGame") {
-            console.log("跳轉到：", `/game-start/${roomId}`);
+      stompClient.connect({}, frame => {
+        console.log("WebSocket connected:", frame);
+        stompClient.subscribe(`/topic/room/${roomId}`, msg => {
+          if (msg.body.trim() === "startGame") {
             window.location.href = `/game-start/${roomId}`;
           }
         });
-      }, function (error) {
-        console.error("WebSocket 連線錯誤:", error);
+      }, err => {
+        console.error("WebSocket 錯誤:", err);
       });
     }
   </script>

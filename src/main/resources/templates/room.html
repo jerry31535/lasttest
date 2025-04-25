@@ -47,14 +47,8 @@
       pollingInterval = setInterval(loadRoomData, 3000);
       connectWebSocket();
 
-      // 在關閉分頁或跳轉前，自動發送退出請求
-      window.addEventListener("beforeunload", () => {
-        const playerName = sessionStorage.getItem("playerName");
-        if (playerName) {
-          const url = `/api/exit-room?roomId=${roomId}&playerName=${encodeURIComponent(playerName)}`;
-          navigator.sendBeacon(url);
-        }
-      });
+      
+      
     });
 
     async function loadRoomData() {

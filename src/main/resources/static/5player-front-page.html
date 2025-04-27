@@ -4,11 +4,12 @@
   <meta charset="UTF-8" />
   <title>遊戲開始畫面</title>
   <link rel="stylesheet" href="/css/5player-front-page.css" />
+  <link rel="stylesheet" href="/css/chatroom.css" />
   <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
 <body>
+
   <div class="top-left">第 1 輪</div>
   <div class="top-right">
     <img src="/images/setting.png" alt="設定" class="icon" />
@@ -17,11 +18,13 @@
   <div class="player-circle" id="player-container"></div>
 
   <div class="bottom-left">目前收集到 n 個資源</div>
+
   <div class="bottom-right">
+    <!-- 🔥 修改：移除 onclick -->
     <img src="/images/chat.png" alt="聊天室" class="icon" />
   </div>
 
-  <!-- 彈窗 -->
+  <!-- 角色彈窗 -->
   <div id="role-popup" class="popup hidden">
     <div class="popup-content">
       <h2 id="role-title"></h2>
@@ -30,7 +33,20 @@
     </div>
   </div>
 
+  <!-- 聊天室彈窗 -->
+  <div id="chat-overlay" class="overlay hidden">
+    <div class="chatroom">
+      <button id="close-btn">&times;</button>
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input">
+        <input type="text" id="message-input" placeholder="輸入訊息...">
+        <button id="send-btn">送出</button>
+      </div>
+    </div>
+  </div>
 
-  <script src="/js/5player-front-page.js"></script>
+  <!-- js -->
+  <script src="/js/5player-front-page.js" defer></script>
+  <script src="/js/chatroom.js" defer></script>
 </body>
 </html>

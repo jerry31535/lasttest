@@ -28,6 +28,9 @@ async function fetchPlayers() {
   try {
     const response = await fetch(`/api/room/${roomId}/players`);
     players = await response.json();
+    window.players = players;                     // 讓其它腳本能拿到
+    window.dispatchEvent(new CustomEvent('playersLoaded', { detail: players }));
+
     renderPlayers(players);
   } catch (err) {
     console.error("❌ 無法載入玩家資料", err);

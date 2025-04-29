@@ -158,3 +158,19 @@ body {
   object-fit: contain;
   margin-bottom: 15px;
 }
+
+/* ★★★ 領袖卡 – 換成 card-leader.png */
+.player-card.leader{
+  background-image: url('/images/card-leader.png');
+}
+
+/* ★★★ 領袖本人看到的按鈕 */
+.action-btn{
+  margin-top: 6px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: #ffd257;
+  cursor: pointer;
+  font-size: 16px;
+}

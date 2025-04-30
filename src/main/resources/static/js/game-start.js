@@ -107,8 +107,20 @@ function connectWebSocket() {
 
       if (msg === "startRealGame") {
         console.log("✅ 收到開始遊戲通知，跳轉中...");
-        window.location.href = `/5player-front-page.html?roomId=${roomId}`;
+      
+        // 先確認房間人數再決定跳轉
+        fetch(`/api/room/${roomId}`)
+          .then(res => res.json())
+          .then(roomData => {
+            const playerCount = roomData.playerCount;
+            window.location.href = `/${playerCount}player-front-page.html?roomId=${roomId}`;
+          })
+          .catch(err => {
+            console.error("❌ 取得房間資訊失敗", err);
+            alert("跳轉失敗，請稍後再試。");
+          });
       }
+      
 
       if (msg.startsWith("avatarSelected:")) {
         const name = msg.split(":")[1];

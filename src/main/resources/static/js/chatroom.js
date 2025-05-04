@@ -69,8 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
       textWrap.appendChild(nameSpan);
       textWrap.appendChild(bubble);
       messageDiv.appendChild(textWrap);
-      messageDiv.appendChild(avatarDiv);
-    } else {
+      messageDiv.appendChild(avatarDiv);  // ✅ 自己訊息頭貼會跑到右邊
+    }
+    else {
       messageDiv.appendChild(avatarDiv);
       textWrap.appendChild(nameSpan);
       textWrap.appendChild(bubble);

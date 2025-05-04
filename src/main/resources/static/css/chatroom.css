@@ -1,99 +1,150 @@
-/* 覆蓋原本 .overlay 及 .chatroom 基本樣式（若已有同名屬性會取代） */
-.overlay{
-    position:fixed;inset:0;
-    background:rgba(0,0,0,.5);
-    display:flex;justify-content:center;align-items:center;
-    z-index:1000;
-}
-
-.chatroom{
-    background:#fafafa;width:320px;max-height:80vh;
-    border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.2);
-    display:flex;flex-direction:column;overflow:hidden;
-    font-family:'Segoe UI','PingFang TC',sans-serif;
-}
-
-/* 關閉按鈕 */
-#close-btn{
-    background:none;border:none;font-size:24px;cursor:pointer;
-    position:absolute;top:8px;right:8px;color:#666;
-}
-#close-btn:hover{color:#000;}
-
-.chat-messages{
-    flex:1;padding:12px;overflow-y:auto;
-    display:flex;flex-direction:column;gap:8px;
-    background:#e5ddd5; /* LINE 淺灰底 */
-}
-
-/* ——— 兩種訊息外框 ——— */
-.message{display:flex;align-items:flex-end;gap:6px;}
-.message.self{flex-direction:row-reverse;}          /* 右側 */
-.message.other{flex-direction:row;}                /* 左側 */
-
-/* 頭貼 */
-.message .avatar{
-    width:36px;height:36px;border-radius:50%;flex-shrink:0;
-    overflow:hidden;border:1px solid #ccc;
-}
-.message .avatar img{width:100%;height:100%;object-fit:cover;}
-
-/* 名稱 */
-.message .name{
-    font-size:12px;color:#888;margin:0 4px;
-    max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-
-/* 氣泡 */
-.message .bubble{
-    max-width:180px;padding:8px 10px;border-radius:12px;
-    font-size:14px;line-height:1.4;word-wrap:break-word;
-    box-shadow:0 1px 2px rgba(0,0,0,.15);
-}
-.message.self .bubble{
-    background:#d5f8c6; /* 自己：淡綠 */
-    border-bottom-right-radius:2px;
-}
-.message.other .bubble{
-    background:#fff;    /* 別人：白色 */
-    border-bottom-left-radius:2px;
-}
-
-/* 輸入區 */
-.chat-input{
-    display:flex;padding:8px;background:#fff;gap:6px;
-    border-top:1px solid #ddd;
-}
-#message-input{
-    flex:1;padding:6px 8px;border:1px solid #ccc;border-radius:8px;
-    font-size:14px;
-}
-#send-btn{
-    padding:6px 12px;font-size:14px;border:none;border-radius:8px;
-    background:#4CAF50;color:#fff;cursor:pointer;
-}
-#send-btn:hover{background:#43a047;}
-
-
-/* === 追加到 chatroom.css 最後即可 === */
-
-/* 1. chatroom 本身要相對定位，才能放置絕對定位的叉叉 */
-.chatroom{
-    position:relative;        /* 新增 */
-}
-
-/* 2. 關閉按鈕的點擊區域與外觀 */
-#close-btn{
-    width:32px; height:32px;              /* 比較好點 */
-    line-height:32px;                     /* 讓「×」置中 */
-    text-align:center;
-    border-radius:50%;
-    font-size:22px;
-    background:#ffffffdd;                 /* 半透明白底 */
-    backdrop-filter:blur(4px);
-    cursor:pointer;
-    transition:background .2s;
-}
-#close-btn:hover{ background:#ffdddd; }
-
-.hidden{ display:none !important; }
+/* 聊天室外框放大 */
+.chatroom {
+    background: #fafafa;
+    width: 400px;             /* ✅ 放大聊天室寬度 */
+    max-height: 85vh;         /* ✅ 提高最大高度 */
+    position: relative;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'Segoe UI', 'PingFang TC', sans-serif;
+  }
+  
+  /* 訊息列表區 */
+  .chat-messages {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #e5ddd5;
+  }
+  
+  /* 訊息框通用 */
+  .message {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+  }
+  .message.self {
+    flex-direction: row-reverse;   /* ✅ 讓頭貼跑到右邊 */
+  }
+  .message.other {
+    flex-direction: row;
+  }
+  
+  /* 頭貼樣式 */
+  .message .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 1px solid #ccc;
+  }
+  .message .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  /* 玩家名稱 */
+  .message .name {
+    font-size: 12px;
+    color: #666;
+    margin: 0 4px;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* 氣泡 */
+  .message .bubble {
+    max-width: 220px;
+    padding: 10px 12px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  }
+  .message.self .bubble {
+    background: #d5f8c6;
+    border-bottom-right-radius: 4px;
+    align-self: flex-end;
+  }
+  .message.other .bubble {
+    background: #fff;
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
+  }
+  
+  /* 輸入欄 */
+  .chat-input {
+    display: flex;
+    padding: 10px;
+    background: #fff;
+    gap: 8px;
+    border-top: 1px solid #ddd;
+  }
+  #message-input {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 14px;
+  }
+  #send-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #4CAF50;
+    color: #fff;
+    cursor: pointer;
+  }
+  #send-btn:hover {
+    background: #43a047;
+  }
+  
+  /* 關閉按鈕 */
+  #close-btn {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 20px;
+    background: #ffffffdd;
+    backdrop-filter: blur(4px);
+    cursor: pointer;
+    transition: background 0.2s;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    border: none;
+    color: #666;
+  }
+  #close-btn:hover {
+    background: #ffdddd;
+  }
+  
+  /* 遮罩 */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .hidden {
+    display: none !important;
+  }
+  

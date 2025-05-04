@@ -51,7 +51,7 @@ body {
 
 .player-card, .player-self {
   position: absolute;
-  width: 157px;
+  width: 165px;
   height: 200px;
   background-image: url('/images/card.png');  /* 套用卡牌背景 */
   background-size: cover;                     /* 背景撐滿整張卡牌 */
@@ -73,6 +73,7 @@ body {
   overflow: hidden;
   border: 3px solid #444;
   background-color: #eee;
+  margin-top: 7px;
 }
 
 .avatar img {
@@ -159,14 +160,13 @@ body {
   margin-bottom: 15px;
 }
 
-/* ★★★ 領袖卡 – 換成 card-leader.png */
+
 .player-card.leader{
   background-image: url('/images/card-leader.png');
 }
 
-/* ★★★ 領袖本人看到的按鈕 */
 .action-btn{
-  margin-top: 6px;
+  margin-top: -1px;
   padding: 4px 8px;
   border: 0;
   border-radius: 6px;

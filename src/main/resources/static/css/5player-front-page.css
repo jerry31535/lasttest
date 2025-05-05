@@ -166,11 +166,11 @@ body {
 }
 
 .action-btn{
-  margin-top: -1px;
+  margin-top: 10px;
   padding: 4px 8px;
   border: 0;
   border-radius: 6px;
-  background: #ffd257;
+  background: #e17546;
   cursor: pointer;
   font-size: 16px;
 }

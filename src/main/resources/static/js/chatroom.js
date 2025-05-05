@@ -40,48 +40,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  /* 畫出單一訊息 */
   function drawMessage({ sender, avatar, content }) {
     const isSelf = sender === playerName;
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${isSelf ? 'self' : 'other'}`;
-
-    /* 頭貼 */
+  
+    // 頭貼
     const avatarDiv = document.createElement('div');
     avatarDiv.className = 'avatar';
     const img = document.createElement('img');
     img.src = avatar || findAvatarByName(sender) || '/images/headshot1.png';
     avatarDiv.appendChild(img);
-
-    /* 文字區 */
+  
+    // 文字區（名稱 + 氣泡）
     const textWrap = document.createElement('div');
-
+    textWrap.className = 'text-wrap'; // 新增 class 統一格式
+  
     const nameSpan = document.createElement('div');
     nameSpan.className = 'name';
     nameSpan.textContent = sender;
-
+  
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
     bubble.textContent = content;
-
-    /* 排序：自己訊息 = [bubble, avatar]，別人 = [avatar, bubble]*/
-    if (isSelf) {
-      textWrap.appendChild(nameSpan);
-      textWrap.appendChild(bubble);
-      messageDiv.appendChild(textWrap);
-      messageDiv.appendChild(avatarDiv);  // ✅ 自己訊息頭貼會跑到右邊
-    }
-    else {
-      messageDiv.appendChild(avatarDiv);
-      textWrap.appendChild(nameSpan);
-      textWrap.appendChild(bubble);
-      messageDiv.appendChild(textWrap);
-    }
-
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight; // 捲到最底
+  
+    textWrap.appendChild(nameSpan);
+    textWrap.appendChild(bubble);
+  
+    // 加入順序：由 CSS 控制 row / row-reverse
+    messageDiv.appendChild(avatarDiv);
+    messageDiv.appendChild(textWrap);
+  
+    chatMessages.prepend(messageDiv);
   }
-
+  
   /* 從全域 players 陣列抓對應頭貼 */
   function findAvatarByName(name) {
     if (window.players && window.players.length) {

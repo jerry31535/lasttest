@@ -261,6 +261,7 @@ public ResponseEntity<Map<String, Room.RoleInfo>> startRealGame(@RequestParam St
 
     /* -------------------- 指派角色 + 隨機領袖 -------------------- */
 
+
     @PostMapping("/room/{roomId}/assign-roles")
     public Map<String,Object> assignRoles(@PathVariable String roomId){
 
@@ -271,4 +272,50 @@ public ResponseEntity<Map<String, Room.RoleInfo>> startRealGame(@RequestParam St
         res.put("currentLeader", room.getCurrentLeader());
         return res;
     }
+
+    /* =================================================
+       🔥 投  票  相  關  端  點
+       ================================================= */
+
+    /** 開始投票（領袖送 expedition） */
+    @PostMapping("/room/{roomId}/start-vote")
+    public ResponseEntity<Void> startVote(
+            @PathVariable String roomId,
+            @RequestBody Map<String,Object> body) {
+
+        @SuppressWarnings("unchecked")             // 🔥 修正：消除未檢查 cast 警告
+        List<String> expedition = (List<String>) body.get("expedition");
+        String leader = (String) body.get("leader");
+
+        roomService.startVote(roomId, expedition, leader);   // 🔥 修正：改用 roomService
+        return ResponseEntity.ok().build();
+    }
+
+    /** 玩家投票 */
+    @PostMapping("/room/{roomId}/vote")
+    public ResponseEntity<Map<String,Object>> vote(
+            @PathVariable String roomId,
+            @RequestBody Map<String,Object> body) {
+
+        String voter = (String) body.get("voter");
+        boolean agree = (Boolean) body.get("agree");
+
+        Map<String,Object> result = roomService.castVote(roomId, voter, agree); // 🔥 修正
+        return ResponseEntity.ok(result);
+    }
+
+    /** 取得目前票數與自身能否投票 */
+    @GetMapping("/room/{roomId}/vote-state")
+    public ResponseEntity<Map<String,Object>> voteState(
+            @PathVariable String roomId,
+            @RequestParam String player) {
+
+        Map<String,Object> state = roomService.getVoteState(roomId, player);    // 🔥 修正
+        return ResponseEntity.ok(state);
+    }
+    @GetMapping("/game-start/{roomId}")
+    public String gameStart(@PathVariable String roomId){
+    return "5player-front-page";   // 或你真正的遊戲模板名
+}
+
 }

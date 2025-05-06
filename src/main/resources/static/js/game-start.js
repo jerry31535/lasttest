@@ -117,7 +117,7 @@ function connectWebSocket() {
           })
           .catch(err => {
             console.error("❌ 取得房間資訊失敗", err);
-            alert("跳轉失敗，請稍後再試。");
+            alert("跳轉中請稍等...!");
           });
       }
       

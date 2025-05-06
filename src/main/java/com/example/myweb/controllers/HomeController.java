@@ -3,16 +3,18 @@ package com.example.myweb.controllers;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class HomeController {
+    @GetMapping("/game-start")
+    public String gameStartQuery(@RequestParam String roomId) {
+        return "5player-front-page";   // 遊戲主畫面模板
+    }
     @GetMapping("/game-start/{roomId}")
     public String gameStart(@PathVariable String roomId) {
         return "game-start";
     }
-    
-    
- 
     @GetMapping("/")
     public String home() {
         return "index"; // 對應 resources/templates/index.html
@@ -72,5 +74,9 @@ public class HomeController {
     @GetMapping("/character-introduction")
     public String characterIntroduction() {
         return "character-introduction"; // 對應 resources/templates/character-introduction.html
+    }
+    @GetMapping("/vote")
+    public String vote() {
+        return "vote-5";
     }
 }

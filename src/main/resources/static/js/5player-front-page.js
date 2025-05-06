@@ -115,17 +115,33 @@ function closeSelectModal() {
   document.getElementById('select-modal').classList.add('hidden');
 }
 
-function confirmSelection() {
+/* ========= 確認選人 → 呼叫後端 start‑vote ========= */
+/* 🔥 更新：改為單一 async 函式 */
+async function confirmSelection() {
   const maxPick = currentRound <= 3 ? 1 : 2;
   if (selectedOrder.length !== maxPick) {
     alert(`請選滿 ${maxPick} 人！`);
     return;
   }
 
-  // 🔥 TODO：呼叫 API / 廣播，再跳轉投票頁
-  window.location.href = `/vote?roomId=${roomId}`;
+  try {
+    // 1. 通知後端：領袖 + 被選人
+    await fetch(`/api/room/${roomId}/start-vote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        leader: playerName,
+        expedition: selectedOrder
+      })
+    });
 
-  closeSelectModal();
+    // 2. 關閉彈窗並跳轉投票頁
+    closeSelectModal();
+    window.location.href = `/vote?roomId=${roomId}`;
+  } catch (err) {
+    console.error("❌ 無法開始投票", err);
+    alert("後端連線失敗，請稍後再試！");
+  }
 }
 
 /* ========= 將角色貼回 players 陣列並渲染 ========= */
@@ -177,15 +193,25 @@ function connectWebSocket() {
 
   stompClient.connect({}, () => {
 
+    // ① 房間廣播：開始正式遊戲
     stompClient.subscribe(`/topic/room/${roomId}`, async msg => {
       if (msg.body.trim() === "startRealGame") await fetchAssignedRoles();
     });
-
+  
+    // ② 領袖廣播
     stompClient.subscribe(`/topic/leader/${roomId}`, msg => {
       leaderId = msg.body;
       renderPlayers(players);
     });
+  
+    // ③ 🔥 投票開始 → 非領袖玩家自動跳轉
+    stompClient.subscribe(`/topic/vote/${roomId}`, () => {
+      if (!location.pathname.startsWith("/vote")) {
+        window.location.href = `/vote?roomId=${roomId}`;
+      }
+    });
   });
+  
 }
 
 document.addEventListener("DOMContentLoaded", async () => {

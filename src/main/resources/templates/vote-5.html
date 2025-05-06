@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>投票階段</title>
+  <link rel="stylesheet" href="/css/vote-5.css">
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+  <div id="vote-container">
+    <h1>投票階段</h1>
+
+    <!-- 給領袖／被選者看的計票區 -->
+    <div id="vote-result" class="hidden">
+      <p>同意票：<span id="agree-count">0</span></p>
+      <p>反對票：<span id="reject-count">0</span></p>
+    </div>
+
+    <!-- 給其他玩家看的按鈕區 -->
+    <div id="vote-buttons" class="hidden">
+      <button id="agree-btn">同意</button>
+      <button id="reject-btn">反對</button>
+    </div>
+
+    <p id="status"></p>
+  </div>
+
+  <script src="/js/vote-5.js" defer></script>
+</body>
+</html>

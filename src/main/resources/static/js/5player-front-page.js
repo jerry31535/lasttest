@@ -3,12 +3,13 @@ const urlParams  = new URLSearchParams(window.location.search);
 const roomId     = urlParams.get("roomId");
 const playerName = sessionStorage.getItem("playerName");
 
-let players  = [];        // 後端 /players 取得
-let myRole   = null;      // 自己角色
-let leaderId = null;      // ★ 本回合領袖 (playerName)
+let players     = [];      // 後端 /players 取得
+let myRole      = null;    // 自己角色
+let leaderId    = null;    // 本回合領袖 (playerName)
 
-/* ★ 修改：採用 window 全域唯一連線物件 */
-if (!window.stompClient) window.stompClient = null;
+/* 🔥 新增：選人流程狀態 */
+let currentRound  = 1;     // 1~n，由後端或 WS 更新
+let selectedOrder = [];    // 按順序存放被選玩家 name
 
 /* 固定座標 */
 const positions = [
@@ -56,8 +57,79 @@ function renderPlayers(arr) {
   });
 }
 
+/* ========= 選人彈窗 ========= */
+function openSelectModal() {
+  const maxPick = currentRound <= 3 ? 1 : 2;
+  const candidates = players.filter(p => p.name !== leaderId);
+
+  const listEl = document.getElementById('candidate-list');
+  listEl.innerHTML = '';
+  selectedOrder = [];
+
+  candidates.forEach(p => {
+    const li = document.createElement('li');
+    li.dataset.name = p.name;
+    li.innerHTML = `
+      <span class="order"></span>
+      <span>${p.name}</span>
+    `;
+    li.addEventListener('click', () => toggleSelect(li, maxPick));
+    listEl.appendChild(li);
+  });
+
+  document.getElementById('select-title').textContent =
+    `請選擇 ${maxPick} 名出戰人員 (剩 ${maxPick})`;
+
+  document.getElementById('select-modal').classList.remove('hidden');
+}
+
+function toggleSelect(li, maxPick) {
+  const name = li.dataset.name;
+  const idx  = selectedOrder.indexOf(name);
+
+  if (idx === -1) {                      // 新增
+    if (selectedOrder.length >= maxPick) return;
+    selectedOrder.push(name);
+  } else {                               // 取消
+    selectedOrder.splice(idx, 1);
+  }
+
+  document.querySelectorAll('#candidate-list li').forEach(li2 => {
+    const orderEl = li2.querySelector('.order');
+    const i = selectedOrder.indexOf(li2.dataset.name);
+    if (i === -1) {
+      li2.classList.remove('selected');
+      orderEl.textContent = '';
+    } else {
+      li2.classList.add('selected');
+      orderEl.textContent = i + 1;
+    }
+  });
+
+  const remain = maxPick - selectedOrder.length;
+  document.getElementById('select-title').textContent =
+    `請選擇 ${maxPick} 名出戰人員 (剩 ${remain})`;
+}
+
+function closeSelectModal() {
+  document.getElementById('select-modal').classList.add('hidden');
+}
+
+function confirmSelection() {
+  const maxPick = currentRound <= 3 ? 1 : 2;
+  if (selectedOrder.length !== maxPick) {
+    alert(`請選滿 ${maxPick} 人！`);
+    return;
+  }
+
+  // 🔥 TODO：呼叫 API / 廣播，再跳轉投票頁
+  window.location.href = `/vote?roomId=${roomId}`;
+
+  closeSelectModal();
+}
+
 /* ========= 將角色貼回 players 陣列並渲染 ========= */
-function applyRolesToPlayers(roleMap){
+function applyRolesToPlayers(roleMap) {
   players = players.map(p => ({ ...p, role: roleMap[p.name]?.name }));
   renderPlayers(players);
 
@@ -73,7 +145,7 @@ async function fetchPlayers() {
   try {
     const res = await fetch(`/api/room/${roomId}/players`);
     players   = await res.json();
-    window.players = players; // 供其他腳本使用
+    window.players = players;
     renderPlayers(players);
   } catch (err) {
     console.error("❌ 無法載入玩家資料", err);
@@ -87,7 +159,7 @@ async function fetchAssignedRoles() {
     if (!res.ok) throw new Error("角色 API 失敗");
 
     const { assignedRoles, currentLeader } = await res.json();
-    leaderId = currentLeader;              // ★ 儲存領袖
+    leaderId = currentLeader;
     applyRolesToPlayers(assignedRoles);
   } catch (err) {
     console.error("❌ 無法取得角色資料", err);
@@ -96,52 +168,41 @@ async function fetchAssignedRoles() {
 
 /* ========= WebSocket ========= */
 function connectWebSocket() {
-
-  /* ★ 修改：只建立一次連線，並重用全域物件 */
   if (!window.stompClient) {
     const socket = new SockJS('/ws');
     window.stompClient = Stomp.over(socket);
   }
   const stompClient = window.stompClient;
-  if (stompClient.connected) return;      // 避免重複 connect
+  if (stompClient.connected) return;
 
   stompClient.connect({}, () => {
 
-    /* 收到房間事件：開始正式遊戲 */
     stompClient.subscribe(`/topic/room/${roomId}`, async msg => {
       if (msg.body.trim() === "startRealGame") await fetchAssignedRoles();
     });
 
-    /* ★ 新增：收到領袖廣播即時更新 */
     stompClient.subscribe(`/topic/leader/${roomId}`, msg => {
       leaderId = msg.body;
-      console.log('[leader update] new leaderId =', leaderId);   // ★ 修改：移除未定義變數
       renderPlayers(players);
     });
   });
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await fetch(`/api/room/${roomId}/assign-roles`, { method: 'POST' }); // ★
-  await fetchPlayers();        // 基本資料
-  await fetchAssignedRoles();  // 若已分派過角色/領袖
+  await fetch(`/api/room/${roomId}/assign-roles`, { method: 'POST' });
+  await fetchPlayers();
+  await fetchAssignedRoles();
   connectWebSocket();
 });
 
-/* ========= 領袖按鈕範例行為 ========= */
-function openSelectModal(){
-  alert("這裡彈出『選擇出戰人員』介面，依你的實際需求實作！");
-}
-
-/* ---- 綁定聊天室圖示 ---- */
-function bindChatIcon(){
+/* ========= 聊天室圖示 ========= */
+function bindChatIcon() {
   const icon     = document.querySelector('.bottom-right .icon, img.icon[alt="聊天室"]');
   const overlay  = document.getElementById('chat-overlay');
   const closeBtn = document.getElementById('close-btn');
 
-  if(!icon || !overlay) return;   // DOM 尚未渲染
-
+  if (!icon || !overlay) return;
   icon.addEventListener('click', () => overlay.classList.remove('hidden'));
-  closeBtn?.addEventListener('click',()=> overlay.classList.add('hidden'));
+  closeBtn?.addEventListener('click', () => overlay.classList.add('hidden'));
 }
 document.addEventListener('DOMContentLoaded', bindChatIcon);

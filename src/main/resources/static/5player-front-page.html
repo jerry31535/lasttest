@@ -20,7 +20,6 @@
   <div class="bottom-left">目前收集到 n 個資源</div>
 
   <div class="bottom-right">
-    <!-- 🔥 修改：移除 onclick -->
     <img src="/images/chat.png" alt="聊天室" class="icon" />
   </div>
 
@@ -38,12 +37,22 @@
       <button id="close-btn">&times;</button>
       <div class="chat-messages" id="chat-messages"></div>
       <div class="chat-input">
-        <input type="text" id="message-input" placeholder="輸入訊息...">
+        <input type="text" id="message-input" placeholder="輸入訊息.">
         <button id="send-btn">送出</button>
       </div>
     </div>
   </div>
-  
+
+  <!-- 🔥 新增：出戰人員選擇彈窗 -->
+  <div id="select-modal" class="select-modal hidden">
+    <div class="select-box">
+      <button class="close-btn" onclick="closeSelectModal()">×</button>
+      <h2 id="select-title">選擇出戰人員</h2>
+      <ul id="candidate-list"></ul>
+      <button id="select-confirm" class="confirm-btn" onclick="confirmSelection()">確認</button>
+    </div>
+  </div>
+
   <!-- js -->
   <script src="/js/5player-front-page.js" defer></script>
   <script src="/js/chatroom.js" defer></script>

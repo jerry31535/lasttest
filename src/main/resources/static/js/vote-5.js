@@ -1,3 +1,4 @@
+/* ========= 全域變數 ========= */
 const urlParams  = new URLSearchParams(window.location.search);
 const roomId     = urlParams.get("roomId");
 const playerName = sessionStorage.getItem("playerName");
@@ -10,34 +11,38 @@ const agreeBtn      = document.getElementById("agree-btn");
 const rejectBtn     = document.getElementById("reject-btn");
 const confirmBtn    = document.getElementById("confirm-btn");
 const statusEl      = document.getElementById("status");
+const expeditionBox = document.getElementById("expedition-container");
 
-let canVote   = false;
-let hasVoted  = false;
-let agree     = 0;
-let reject    = 0;
-let total     = 0;
-let selectedVote = null; // 🔥 新增：記錄使用者的選擇
+let players   = [];         // 從後端 /players 取得的 {name, avatar}
+let expedition = [];        // 目前被提名玩家名單
+let canVote    = false;
+let hasVoted   = false;
+let agree      = 0;
+let reject     = 0;
+let selectedVote = null;
 
-async function init() {
-  try {
-    const res = await fetch(`/api/room/${roomId}/vote-state?player=${encodeURIComponent(playerName)}`);
-    if (!res.ok) throw new Error("vote‑state 取得失敗");
-
-    const data = await res.json();
-    agree     = data.agree;
-    reject    = data.reject;
-    total     = data.total;
-    canVote   = data.canVote;
-    hasVoted  = data.hasVoted;
-
-    updateUI();
-    connectWS();
-  } catch (err) {
-    console.error(err);
-    statusEl.textContent = "無法取得投票資訊";
-  }
+/* ========= 後端 API ========= */
+async function fetchPlayers() {
+  const res = await fetch(`/api/room/${roomId}/players`);
+  players   = await res.json();       // [{name, avatar}, ...]
 }
 
+/* ========= Expedition UI ========= */
+function renderExpedition(list) {
+  expeditionBox.innerHTML = "";
+  list.forEach(name => {
+    const p = players.find(v => v.name === name);
+    if (!p) return;
+    expeditionBox.insertAdjacentHTML("beforeend", `
+      <div class="exp-card">
+        <img src="/images/${p.avatar}" alt="${p.name}">
+        <div class="exp-name">${p.name}</div>
+      </div>
+    `);
+  });
+}
+
+/* ========= UI 更新 ========= */
 function updateUI() {
   agreeCountEl.textContent  = agree;
   rejectCountEl.textContent = reject;
@@ -46,13 +51,12 @@ function updateUI() {
     btnBox.classList.remove("hidden");
     resultBox.classList.add("hidden");
   } else {
-    // 包含「已投票但其他人尚未投完」與「全部投完」兩種狀態
     resultBox.classList.remove("hidden");
     btnBox.classList.add("hidden");
   }
 }
 
-
+/* ========= 送出投票 ========= */
 async function sendVote(value) {
   if (hasVoted) return;
   disableButtons();
@@ -63,54 +67,73 @@ async function sendVote(value) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ voter: playerName, agree: value })
     });
-    if (!res.ok) throw new Error("投票失敗");
+    if (!res.ok) throw new Error();
     hasVoted = true;
     statusEl.textContent = "已送出，等待其他玩家...";
-  } catch (err) {
-    console.error(err);
+  } catch {
     statusEl.textContent = "投票失敗，請重新整理再試";
   }
 }
 
 function disableButtons() {
-  agreeBtn.disabled = true;
-  rejectBtn.disabled = true;
-  confirmBtn.disabled = true;
+  agreeBtn.disabled = rejectBtn.disabled = confirmBtn.disabled = true;
 }
 
+/* ========= WebSocket ========= */
 function connectWS() {
-  const socket = new SockJS("/ws");
-  const stomp  = Stomp.over(socket);
+  const stomp = Stomp.over(new SockJS("/ws"));
 
   stomp.connect({}, () => {
     stomp.subscribe(`/topic/vote/${roomId}`, msg => {
       const data = JSON.parse(msg.body);
-      agree  = data.agree;
-      reject = data.reject;
+
+      agree      = data.agree;
+      reject     = data.reject;
+      expedition = data.expedition || expedition;
+      renderExpedition(expedition);
       updateUI();
 
       if (data.finished) {
-        // 顯示最終票數
         resultBox.classList.remove("hidden");
         btnBox.classList.add("hidden");
         statusEl.textContent = "投票結束！結果如下：";
 
-        /* ✅ 只有反對票 > 同意票才跳轉 */
         if (reject > agree) {
           setTimeout(() => {
             window.location.replace(
               `/5player-front-page.html?roomId=${encodeURIComponent(roomId)}`
             );
-          }, 3000); // 3 秒後跳，讓玩家看清楚結果
+          }, 3000);
         }
-        // 同意票 >= 反對票 時就留在此頁，等待領袖後續操作
       }
     });
   });
 }
 
+/* ========= 初始化 ========= */
+async function init() {
+  await fetchPlayers();
 
-// 🔥 同意／反對選擇與視覺提示
+  try {
+    const res = await fetch(`/api/room/${roomId}/vote-state?player=${encodeURIComponent(playerName)}`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+
+    agree      = data.agree;
+    reject     = data.reject;
+    canVote    = data.canVote;
+    hasVoted   = data.hasVoted;
+    expedition = data.expedition || [];
+
+    renderExpedition(expedition);
+    updateUI();
+    connectWS();
+  } catch {
+    statusEl.textContent = "無法取得投票資訊";
+  }
+}
+
+/* ========= 事件繫結 ========= */
 agreeBtn.addEventListener("click", () => {
   if (hasVoted) return;
   selectedVote = true;

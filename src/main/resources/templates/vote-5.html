@@ -11,7 +11,10 @@
   <div id="vote-container">
     <h1>投票階段</h1>
 
-    <!-- 計票顯示區 -->
+    <!-- 出戰玩家卡牌 -->
+    <div id="expedition-container" class="expedition"></div>
+
+    <!-- 票數顯示區（全員投完才顯示） -->
     <div id="vote-result" class="hidden">
       <p>同意票：<span id="agree-count">0</span></p>
       <p>反對票：<span id="reject-count">0</span></p>
@@ -21,9 +24,10 @@
     <div id="vote-buttons" class="hidden">
       <button id="agree-btn">同意</button>
       <button id="reject-btn">反對</button>
-      <button id="confirm-btn">確認</button> <!-- 🔥 新增確認 -->
+      <button id="confirm-btn">確認</button>
     </div>
 
+    <!-- 狀態文字 -->
     <p id="status"></p>
   </div>
 

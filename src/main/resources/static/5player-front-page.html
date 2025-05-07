@@ -11,6 +11,7 @@
 <body>
 
   <div class="top-left">第 1 輪</div>
+
   <div class="top-right">
     <img src="/images/setting.png" alt="設定" class="icon" />
   </div>
@@ -23,6 +24,13 @@
     <img src="/images/chat.png" alt="聊天室" class="icon" />
   </div>
 
+  <!-- 底中：領袖專用按鈕 -->
+  <div class="bottom-center hidden" id="leader-action">
+    <button id="select-expedition-btn" class="action-btn">
+      選擇出戰人員
+    </button>
+  </div>
+
   <!-- 角色彈窗 -->
   <div id="role-popup" class="popup hidden">
     <div class="popup-content">
@@ -32,6 +40,7 @@
     </div>
   </div>
 
+  <!-- 聊天室 -->
   <div id="chat-overlay" class="overlay hidden">
     <div class="chatroom">
       <button id="close-btn">&times;</button>
@@ -43,7 +52,7 @@
     </div>
   </div>
 
-  <!-- 🔥 新增：出戰人員選擇彈窗 -->
+  <!-- 出戰人員選擇彈窗 -->
   <div id="select-modal" class="select-modal hidden">
     <div class="select-box">
       <button class="close-btn" onclick="closeSelectModal()">×</button>
@@ -53,7 +62,6 @@
     </div>
   </div>
 
-  <!-- js -->
   <script src="/js/5player-front-page.js" defer></script>
   <script src="/js/chatroom.js" defer></script>
 </body>

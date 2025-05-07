@@ -46,3 +46,22 @@ body{
     color: white;
   }
   
+  .expedition{
+    display:flex;
+    gap:12px;
+    justify-content:center;
+    margin:12px 0 20px;
+  }
+  .exp-card{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    font-size:14px;
+  }
+  .exp-card img{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    object-fit:cover;
+  }
+  

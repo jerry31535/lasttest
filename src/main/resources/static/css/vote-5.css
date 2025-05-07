@@ -41,3 +41,8 @@ body{
   }
   .hidden{display:none;}
   
+  #vote-buttons button.selected {
+    background-color: #4CAF50;
+    color: white;
+  }
+  

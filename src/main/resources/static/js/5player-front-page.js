@@ -1,17 +1,13 @@
-/* ========= 參數與全域變數 ========= */
 const urlParams  = new URLSearchParams(window.location.search);
 const roomId     = urlParams.get("roomId");
 const playerName = sessionStorage.getItem("playerName");
 
-let players     = [];      // 後端 /players 取得
-let myRole      = null;    // 自己角色
-let leaderId    = null;    // 本回合領袖 (playerName)
+let players     = [];
+let myRole      = null;
+let leaderId    = null;
+let currentRound  = 1;
+let selectedOrder = [];
 
-/* 🔥 新增：選人流程狀態 */
-let currentRound  = 1;     // 1~n，由後端或 WS 更新
-let selectedOrder = [];    // 按順序存放被選玩家 name
-
-/* 固定座標 */
 const positions = [
   { top: '3%',  left: '55%' },
   { top: '3%',  right: '55%' },
@@ -20,7 +16,10 @@ const positions = [
   { bottom: '30px', left: '50%', transform: 'translateX(-50%)' }
 ];
 
-/* ========= 依自己視角排序 ========= */
+function getMaxPick(round) {
+  return round <= 3 ? 2 : 3;
+}
+
 function reorderPlayers(arr) {
   const meIdx = arr.findIndex(p => p.name === playerName);
   if (meIdx === -1) return arr;
@@ -30,13 +29,11 @@ function reorderPlayers(arr) {
   return ordered;
 }
 
-/* ========= 重新渲染卡片 ========= */
 function renderPlayers(arr) {
   const container = document.getElementById("player-container");
   container.innerHTML = "";
 
   const ordered = reorderPlayers(arr);
-
   ordered.forEach((p, idx) => {
     const isSelf   = p.name === playerName;
     const isLeader = p.name === leaderId;
@@ -57,10 +54,9 @@ function renderPlayers(arr) {
   });
 }
 
-/* ========= 選人彈窗 ========= */
 function openSelectModal() {
-  const maxPick = currentRound <= 3 ? 1 : 2;
-  const candidates = players.filter(p => p.name !== leaderId);
+  const maxPick = getMaxPick(currentRound);
+  const candidates = players;
 
   const listEl = document.getElementById('candidate-list');
   listEl.innerHTML = '';
@@ -87,10 +83,10 @@ function toggleSelect(li, maxPick) {
   const name = li.dataset.name;
   const idx  = selectedOrder.indexOf(name);
 
-  if (idx === -1) {                      // 新增
+  if (idx === -1) {
     if (selectedOrder.length >= maxPick) return;
     selectedOrder.push(name);
-  } else {                               // 取消
+  } else {
     selectedOrder.splice(idx, 1);
   }
 
@@ -115,17 +111,14 @@ function closeSelectModal() {
   document.getElementById('select-modal').classList.add('hidden');
 }
 
-/* ========= 確認選人 → 呼叫後端 start‑vote ========= */
-/* 🔥 更新：改為單一 async 函式 */
 async function confirmSelection() {
-  const maxPick = currentRound <= 3 ? 1 : 2;
+  const maxPick = getMaxPick(currentRound);
   if (selectedOrder.length !== maxPick) {
     alert(`請選滿 ${maxPick} 人！`);
     return;
   }
 
   try {
-    // 1. 通知後端：領袖 + 被選人
     await fetch(`/api/room/${roomId}/start-vote`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -135,7 +128,6 @@ async function confirmSelection() {
       })
     });
 
-    // 2. 關閉彈窗並跳轉投票頁
     closeSelectModal();
     window.location.href = `/vote?roomId=${roomId}`;
   } catch (err) {
@@ -144,7 +136,6 @@ async function confirmSelection() {
   }
 }
 
-/* ========= 將角色貼回 players 陣列並渲染 ========= */
 function applyRolesToPlayers(roleMap) {
   players = players.map(p => ({ ...p, role: roleMap[p.name]?.name }));
   renderPlayers(players);
@@ -156,7 +147,6 @@ function applyRolesToPlayers(roleMap) {
   }
 }
 
-/* ========= 取得玩家清單 ========= */
 async function fetchPlayers() {
   try {
     const res = await fetch(`/api/room/${roomId}/players`);
@@ -168,7 +158,6 @@ async function fetchPlayers() {
   }
 }
 
-/* ========= 取得角色 + 領袖 ========= */
 async function fetchAssignedRoles() {
   try {
     const res = await fetch(`/api/room/${roomId}/roles`);
@@ -182,7 +171,6 @@ async function fetchAssignedRoles() {
   }
 }
 
-/* ========= WebSocket ========= */
 function connectWebSocket() {
   if (!window.stompClient) {
     const socket = new SockJS('/ws');
@@ -192,26 +180,21 @@ function connectWebSocket() {
   if (stompClient.connected) return;
 
   stompClient.connect({}, () => {
-
-    // ① 房間廣播：開始正式遊戲
     stompClient.subscribe(`/topic/room/${roomId}`, async msg => {
       if (msg.body.trim() === "startRealGame") await fetchAssignedRoles();
     });
-  
-    // ② 領袖廣播
+
     stompClient.subscribe(`/topic/leader/${roomId}`, msg => {
       leaderId = msg.body;
       renderPlayers(players);
     });
-  
-    // ③ 🔥 投票開始 → 非領袖玩家自動跳轉
+
     stompClient.subscribe(`/topic/vote/${roomId}`, () => {
       if (!location.pathname.startsWith("/vote")) {
         window.location.href = `/vote?roomId=${roomId}`;
       }
     });
   });
-  
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -221,7 +204,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   connectWebSocket();
 });
 
-/* ========= 聊天室圖示 ========= */
 function bindChatIcon() {
   const icon     = document.querySelector('.bottom-right .icon, img.icon[alt="聊天室"]');
   const overlay  = document.getElementById('chat-overlay');

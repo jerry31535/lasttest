@@ -42,18 +42,16 @@ function updateUI() {
   agreeCountEl.textContent  = agree;
   rejectCountEl.textContent = reject;
 
-  if (canVote) {
+  if (canVote && !hasVoted) {
     btnBox.classList.remove("hidden");
     resultBox.classList.add("hidden");
-    if (hasVoted) {
-      disableButtons();
-      statusEl.textContent = "已投票，請等待其他玩家...";
-    }
   } else {
+    // 包含「已投票但其他人尚未投完」與「全部投完」兩種狀態
     resultBox.classList.remove("hidden");
     btnBox.classList.add("hidden");
   }
 }
+
 
 async function sendVote(value) {
   if (hasVoted) return;
@@ -83,21 +81,34 @@ function disableButtons() {
 function connectWS() {
   const socket = new SockJS("/ws");
   const stomp  = Stomp.over(socket);
+
   stomp.connect({}, () => {
     stomp.subscribe(`/topic/vote/${roomId}`, msg => {
       const data = JSON.parse(msg.body);
       agree  = data.agree;
       reject = data.reject;
       updateUI();
+
       if (data.finished) {
-        const target = agree >= reject
-          ? `/expedition?roomId=${encodeURIComponent(roomId)}`
-          : `/5player-front-page.html?roomId=${encodeURIComponent(roomId)}`;
-        window.location.replace(target);
+        // 顯示最終票數
+        resultBox.classList.remove("hidden");
+        btnBox.classList.add("hidden");
+        statusEl.textContent = "投票結束！結果如下：";
+
+        /* ✅ 只有反對票 > 同意票才跳轉 */
+        if (reject > agree) {
+          setTimeout(() => {
+            window.location.replace(
+              `/5player-front-page.html?roomId=${encodeURIComponent(roomId)}`
+            );
+          }, 3000); // 3 秒後跳，讓玩家看清楚結果
+        }
+        // 同意票 >= 反對票 時就留在此頁，等待領袖後續操作
       }
     });
   });
 }
+
 
 // 🔥 同意／反對選擇與視覺提示
 agreeBtn.addEventListener("click", () => {

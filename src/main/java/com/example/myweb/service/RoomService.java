@@ -129,29 +129,28 @@ public class RoomService {
         Room room = roomRepo.findById(roomId)
                             .orElseThrow(() -> new RuntimeException("Room not found"));
 
-        // 寫入票
+        /* -------- 寫入票 -------- */
         room.getVoteMap().put(voter, agree);
         roomRepo.save(room);
 
         long agreeCnt  = room.getVoteMap().values().stream().filter(b -> b).count();
         long rejectCnt = room.getVoteMap().size() - agreeCnt;
 
-        boolean finished = room.getVoteMap().size() == room.getPlayers().size()
-                        || rejectCnt > room.getPlayers().size() / 2
-                        || agreeCnt  > room.getPlayers().size() / 2;
+        /* ✅ 只有「所有人都投完」才 finished */
+        boolean finished = room.getVoteMap().size() == room.getPlayers().size();
 
         Map<String,Object> payload = Map.of(
-                "agree", agreeCnt,
-                "reject", rejectCnt,
+                "agree",    agreeCnt,
+                "reject",   rejectCnt,
                 "finished", finished
         );
 
-        // 即時推播最新票數
         ws.convertAndSend("/topic/vote/" + roomId, payload);
         return payload;
     }
 
-    /** 🔥 查詢投票狀態（給前端 vote.html 初始化） */
+
+   /** 🔥 查詢投票狀態（給前端 vote.html 初始化） */
     public Map<String,Object> getVoteState(String roomId, String requester) {
         Room room = roomRepo.findById(roomId)
                             .orElseThrow(() -> new RuntimeException("Room not found"));
@@ -159,17 +158,18 @@ public class RoomService {
         long agreeCnt  = room.getVoteMap().values().stream().filter(Boolean::booleanValue).count();
         long rejectCnt = room.getVoteMap().size() - agreeCnt;
 
-        boolean canVote = !Objects.equals(room.getCurrentLeader(), requester)
-                       && !room.getCurrentExpedition().contains(requester);
-
         boolean hasVoted = room.getVoteMap().containsKey(requester);
 
+        // ✅ 所有人都能投票，只要還沒投過就行
+        boolean canVote = !hasVoted;
+
         return Map.of(
-                "agree", agreeCnt,
-                "reject", rejectCnt,
-                "total", room.getPlayers().size(),
+                "agree",   agreeCnt,
+                "reject",  rejectCnt,
+                "total",   room.getPlayers().size(),
                 "canVote", canVote,
-                "hasVoted", hasVoted
+                "hasVoted",hasVoted
         );
     }
+
 }

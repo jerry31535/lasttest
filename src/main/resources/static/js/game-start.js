@@ -27,8 +27,7 @@ function confirmAvatar() {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ playerName, avatar: selectedAvatar })
-  }).then(() => {
-    alert("頭貼確認完成，請等待其他玩家");
+  
   }).catch(err => {
     console.error("❌ 確認頭貼失敗:", err);
   });
@@ -106,18 +105,19 @@ function connectWebSocket() {
       }
 
       if (msg === "startRealGame") {
-        console.log("✅ 收到開始遊戲通知，先載入角色後再跳轉");
+        console.log("✅ 收到開始遊戲通知，跳轉中...");
       
-        // 等角色 API 跑完，確保分配結果已就緒
-        try {
-          await fetchAssignedRoles();   // 這個 function 會呼叫 /api/room/{roomId}/roles
-          // 一律跳到固定的 5 人畫面
-          window.location.href = `/5player-front-page.html?roomId=${roomId}`;
-        } catch (err) {
-          console.error("❌ 載入角色失敗，無法跳轉", err);
-          
-        }
-      
+        // 先確認房間人數再決定跳轉
+        fetch(`/api/room/${roomId}`)
+          .then(res => res.json())
+          .then(roomData => {
+            const playerCount = roomData.playerCount;
+            window.location.href = `/${playerCount}player-front-page.html?roomId=${roomId}`;
+          })
+          .catch(err => {
+            console.error("❌ 取得房間資訊失敗", err);
+            
+          });
       }
       
 

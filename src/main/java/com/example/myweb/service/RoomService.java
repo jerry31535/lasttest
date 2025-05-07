@@ -59,15 +59,31 @@ public class RoomService {
         if (room.getAssignedRoles() == null || room.getAssignedRoles().isEmpty()) {
             List<String> names = new ArrayList<>(room.getPlayers());
 
-            List<Room.RoleInfo> roles = Arrays.asList(
-                new Room.RoleInfo("工程師",      "goodpeople1.png"),
-                new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
-                new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
-                new Room.RoleInfo("潛伏者",     "badpeople1.png"),
-                new Room.RoleInfo("邪惡平民",   "badpeople4.png")
-            );
+            int count = room.getPlayerCount();
+            List<Room.RoleInfo> roles;
+            if (count == 5) {
+                roles = Arrays.asList(
+                    new Room.RoleInfo("工程師",      "goodpeople1.png"),
+                    new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
+                    new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
+                    new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                    new Room.RoleInfo("邪惡平民",   "badpeople4.png")
+                );
+            } else if (count == 6) {
+                roles = Arrays.asList(
+                    new Room.RoleInfo("指揮官",     "goodpeople3.png"),
+                    new Room.RoleInfo("工程師",     "goodpeople1.png"),
+                    new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                    new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                    new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                    new Room.RoleInfo("邪惡平民",   "badpeople4.png")
+                );
+            } else {
+                throw new RuntimeException("尚未支援此人數的遊戲模式");
+            }
             Collections.shuffle(names);
             Collections.shuffle(roles);
+           
 
             Map<String,Room.RoleInfo> assigned = new HashMap<>();
             for (int i = 0; i < names.size(); i++) assigned.put(names.get(i), roles.get(i));

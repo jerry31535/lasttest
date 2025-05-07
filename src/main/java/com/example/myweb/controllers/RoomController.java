@@ -197,12 +197,12 @@ public ResponseEntity<Map<String, Room.RoleInfo>> startRealGame(@RequestParam St
 
         case 6:
             roles = new ArrayList<>(Arrays.asList(
-                new Room.RoleInfo("工程師", "goodpeople1.png"),
-                new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
-                new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
-                new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
-                new Room.RoleInfo("潛伏者", "badpeople1.png"),
-                new Room.RoleInfo("邪惡平民", "badpeople4.png")
+                new Room.RoleInfo("指揮官",     "goodpeople3.png"),
+                new Room.RoleInfo("工程師",     "goodpeople1.png"),
+                new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                new Room.RoleInfo("邪惡平民",   "badpeople4.png")
             ));
             break;
 

@@ -1,36 +1,42 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <title>6 人模式測試頁面</title>
-  <style>
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f0f8ff;
-      font-family: Arial, sans-serif;
-    }
-    .test-box {
-      text-align: center;
-      background: white;
-      border: 2px solid #000;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    h1 {
-      margin: 0;
-      color: #333;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <title>六人遊戲開始畫面</title>
+  <!-- 沿用 5 人版的樣式表 -->
+  <link rel="stylesheet" href="/css/5player-front-page.css" />
+  <!-- SockJS 與 STOMP 客戶端 -->
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+  <!-- 六人版前端邏輯 -->
+  <script src="/js/6player-front-page.js" defer></script>
 </head>
 <body>
-  <div class="test-box">
-    <h1>✅ 你已成功跳轉至 6 人遊戲頁面！</h1>
-    <p>這是一個測試頁面，用來驗證跳轉功能。</p>
+  <!-- 回合顯示 -->
+  <div class="top-left">第 <span id="round-number">1</span> 輪</div>
+
+  <!-- 設定／聊天室圖示 -->
+  <div class="top-right">
+    <img src="/images/setting.png" alt="設定" class="icon" />
+  </div>
+
+  <!-- 玩家卡片容器 -->
+  <div class="player-circle" id="player-container"></div>
+
+  <!-- 聊天室覆蓋層 -->
+  <div class="chat-overlay hidden" id="chat-overlay">
+    <button id="close-btn">關閉</button>
+    <div class="chat-container"></div>
+    <input type="text" id="chat-input" placeholder="輸入訊息" />
+    <button id="chat-send-btn">送出</button>
+  </div>
+
+  <!-- 資源與聊天室按鈕 -->
+  <div class="bottom-left">
+    目前收集到 <span id="resource-count">0</span> 個資源
+  </div>
+  <div class="bottom-right">
+    <img src="/images/chat.png" alt="聊天室" class="icon" />
   </div>
 </body>
 </html>

@@ -1,67 +1,130 @@
-/* 基本置中排版 */
-body{
-    font-family: "Noto Sans TC", sans-serif;
-    background:#f2f2f2;
-    display:flex; justify-content:center; align-items:center;
-    height:100vh; margin:0;
-  }
-  
-  #vote-container{
-    background:#fff;
-    border-radius:12px;
-    padding:32px 40px;
-    box-shadow:0 4px 12px rgba(0,0,0,.15);
-    text-align:center;
-  }
-  
-  h1{margin-top:0;margin-bottom:24px;}
-  
-  #vote-result p{
-    margin:6px 0;
-    font-size:20px;
-  }
-  
-  #vote-buttons button{
-    padding:10px 28px;
-    margin:0 12px;
-    font-size:18px;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    transition:transform .1s ease;
-  }
-  #vote-buttons button:hover{transform:scale(1.05);}
-  #agree-btn{background:#4caf50;color:#fff;}
-  #reject-btn{background:#f44336;color:#fff;}
-  
-  #status{
-    margin-top:20px;
-    font-size:16px;
-    color:#555;
-  }
-  .hidden{display:none;}
-  
-  #vote-buttons button.selected {
-    background-color: #4CAF50;
-    color: white;
-  }
-  
-  .expedition{
-    display:flex;
-    gap:12px;
-    justify-content:center;
-    margin:12px 0 20px;
-  }
-  .exp-card{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    font-size:14px;
-  }
-  .exp-card img{
-    width:60px;
-    height:60px;
-    border-radius:50%;
-    object-fit:cover;
-  }
-  
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  height: 100vh;
+  position: relative;
+  background: url('/images/game-background.png') center/cover no-repeat;
+  background-position: center center;
+  background-attachment: fixed;
+  overflow: hidden; /* ✅ 隱藏右側滾動條 */
+}
+
+/* 整體放大 */
+#vote-container {
+  background: transparent;
+  border-radius: 12px;
+  padding: 42px 56px 30px;  /* ✅ 下方 padding 改小 */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
+  text-align: center;
+  transform: scale(1.15);
+  transform-origin: center;
+}
+
+h1 {
+  margin: 0 0 32px;
+  font-size: 48px;
+  letter-spacing: 2px;
+}
+
+/* Expedition 卡牌容器 */
+.expedition {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin: 20px 0 30px;
+}
+
+.exp-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 220px;
+  background: url("/images/card.png") center/contain no-repeat;
+  background-size: cover;
+  padding: 20px 0;
+  position: relative;
+}
+
+.avatar-wrapper {
+  position: relative;
+  margin-top: 50px;
+  width: 60%;
+  aspect-ratio: 1/1; /* 保持正方形比例 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.avatar-wrapper img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  transform: translateY(-20px); /* 頭像上移 */
+  border: 4px solid black;     /* ✅ 黑色邊框 */
+  box-shadow: none;            /* ✅ 移除陰影 */
+}
+
+.exp-name {
+  margin-top: 20px;
+ margin-bottom: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+   transform: translateY(-20px); 
+}
+
+/* 投票結果與按鈕 */
+#vote-result p {
+  margin: 8px 0;
+  font-size: 24px;
+}
+
+#vote-buttons {
+  margin-top: 10px; /* ✅ 按鈕整區往上移 */
+}
+
+#vote-buttons button {
+  padding: 10px 28px;
+  margin: 0 10px;
+  font-size: 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform .1s ease;
+}
+
+#vote-buttons button:hover {
+  transform: scale(1.05);
+}
+
+#agree-btn {
+  background: #0ae819;
+  color: #fff;
+}
+
+#reject-btn {
+  background: #f44336;
+  color: #fff;
+}
+
+#confirm-btn {
+  background: #e0e0e0;
+  color: #333;
+}
+
+#vote-buttons button.selected {
+  outline: 3px solid #fff;
+}
+
+#status {
+  margin-top: 28px;
+  font-size: 18px;
+  color: #555;
+}
+
+.hidden {
+  display: none;
+}

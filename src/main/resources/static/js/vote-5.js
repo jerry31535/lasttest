@@ -24,10 +24,9 @@ let selectedVote = null;
 /* ========= 後端 API ========= */
 async function fetchPlayers() {
   const res = await fetch(`/api/room/${roomId}/players`);
-  players   = await res.json();       // [{name, avatar}, ...]
+  players   = await res.json();  // [{name, avatar}, ...]
 }
 
-/* ========= Expedition UI ========= */
 function renderExpedition(list) {
   expeditionBox.innerHTML = "";
   list.forEach(name => {
@@ -35,7 +34,9 @@ function renderExpedition(list) {
     if (!p) return;
     expeditionBox.insertAdjacentHTML("beforeend", `
       <div class="exp-card">
-        <img src="/images/${p.avatar}" alt="${p.name}">
+        <div class="avatar-wrapper">
+          <img src="/images/${p.avatar}" alt="${p.name}">
+        </div>
         <div class="exp-name">${p.name}</div>
       </div>
     `);

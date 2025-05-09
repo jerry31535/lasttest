@@ -19,17 +19,22 @@ avatarImages.forEach(img => {
 function confirmAvatar() {
   const selectedAvatar = localStorage.getItem("selectedAvatar");
   const playerName = sessionStorage.getItem("playerName");
+  const confirmBtn = document.querySelector(".confirm-button");
 
   if (!selectedAvatar) return alert("請先選擇頭貼！");
   if (!playerName) return alert("尚未登入！");
+
+  confirmBtn.disabled = true;
+  
 
   fetch(`/api/room/${roomId}/select-avatar`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ playerName, avatar: selectedAvatar })
-  
   }).catch(err => {
     console.error("❌ 確認頭貼失敗:", err);
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = "確認頭貼";
   });
 }
 
@@ -136,4 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
   connectWebSocket();
   startButton.textContent = "等待其他玩家選擇頭貼...";
   startButton.disabled = true;
+  const confirmBtn = document.querySelector(".confirm-button");
+  confirmBtn.addEventListener("click", confirmAvatar);
+  
 });

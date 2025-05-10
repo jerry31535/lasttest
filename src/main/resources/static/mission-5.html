@@ -1,0 +1,28 @@
+<!-- /static/mission-5.html -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>任務選擇</title>
+  <link rel="stylesheet" href="/css/mission-5.css">
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+  <div id="mission-container">
+    <!-- 這兩塊會由 JS 決定顯示哪一種 -->
+    <div id="choice-panel" class="hidden">
+      <h1>請選擇任務結果卡</h1>
+      <div class="btn-group">
+        <button id="success-btn">成功卡</button>
+        <button id="fail-btn">失敗卡</button>
+      </div>
+      <button id="confirm-btn" disabled>確認</button>
+    </div>
+    <div id="waiting-panel" class="hidden">
+      <h1>等待結果中…</h1>
+    </div>
+  </div>
+  <script src="/js/mission-5.js" defer></script>
+</body>
+</html>

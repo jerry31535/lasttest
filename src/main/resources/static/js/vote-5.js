@@ -95,18 +95,27 @@ function connectWS() {
       updateUI();
 
       if (data.finished) {
-        resultBox.classList.remove("hidden");
-        btnBox.classList.add("hidden");
-        statusEl.textContent = "投票結束！結果如下：";
+          resultBox.classList.remove("hidden");
+          btnBox.classList.add("hidden");
+          statusEl.textContent = "投票結束，結果：" + (agree > reject ? "通過" : "失敗");
 
-        if (reject > agree) {
-          setTimeout(() => {
-            window.location.replace(
-              `/5player-front-page.html?roomId=${encodeURIComponent(roomId)}`
-            );
-          }, 3000);
+          if (agree > reject) {
+            // 任務通過 → 所有人跳到 mission
+            setTimeout(() => {
+              window.location.replace(
+                `/mission-5.html?roomId=${encodeURIComponent(roomId)}`
+              );
+            }, 1000);
+          } else {
+            // 任務失敗 → 回主畫面
+            setTimeout(() => {
+              window.location.replace(
+                `/5player-front-page.html?roomId=${encodeURIComponent(roomId)}`
+              );
+            }, 2000);
+          }
         }
-      }
+
     });
   });
 }

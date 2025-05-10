@@ -1,42 +1,55 @@
 /* /css/mission-5.css */
 body {
-  margin: 0; padding: 0;
+  margin: 0;
+  padding: 0;
   font-family: sans-serif;
   background: #f0f0f0 url('/images/game-background.png') center/cover no-repeat;
   height: 100vh;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-}
-#mission-container {
-  background: rgba(255,255,255,0.9);
-  padding: 24px;
-  border-radius: 12px;
   text-align: center;
 }
+
 .btn-group {
   display: flex;
+  align-items: center;   /* 垂直置中 */
   gap: 16px;
   margin: 20px 0;
 }
+
+/* 按鈕顏色設定 */
+#success-btn {
+  background-color: #28a745;  /* 綠色 */
+  color: #fff;
+}
+#fail-btn {
+  background-color: #dc3545;  /* 紅色 */
+  color: #fff;
+}
+#confirm-btn {
+  background-color: #fff;     /* 白色 */
+  color: #000;
+  border: 1px solid #000;
+}
+
 button {
   padding: 12px 24px;
   font-size: 18px;
-  border: none;
   border-radius: 8px;
   cursor: pointer;
 }
-button.selected {
-  background: #e17546;
-  color: #fff;
-}
+
 button:disabled {
   opacity: 0.5;
   cursor: default;
 }
-#confirm-btn {
-  margin-top: 12px;
+
+button.selected {
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
 }
+
 .hidden {
   display: none;
 }

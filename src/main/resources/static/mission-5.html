@@ -9,20 +9,21 @@
   <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
 <body>
-  <div id="mission-container">
-    <!-- 這兩塊會由 JS 決定顯示哪一種 -->
-    <div id="choice-panel" class="hidden">
-      <h1>請選擇任務結果卡</h1>
-      <div class="btn-group">
-        <button id="success-btn">成功卡</button>
-        <button id="fail-btn">失敗卡</button>
-      </div>
+  <div id="choice-panel" class="hidden">
+    <h1>請選擇任務結果卡</h1>
+
+    <!-- 三個按鈕都放在 btn-group -->
+    <div class="btn-group">
+      <button id="success-btn">成功卡</button>
+      <button id="fail-btn">失敗卡</button>
       <button id="confirm-btn" disabled>確認</button>
     </div>
-    <div id="waiting-panel" class="hidden">
-      <h1>等待結果中…</h1>
-    </div>
   </div>
+
+  <div id="waiting-panel" class="hidden">
+    <h1>等待結果中…</h1>
+  </div>
+
   <script src="/js/mission-5.js" defer></script>
 </body>
 </html>

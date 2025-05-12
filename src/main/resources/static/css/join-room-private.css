@@ -107,3 +107,13 @@ h1 {
     transform: scale(1.05);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
 }
+
+#title {
+    width: 550px;
+    max-width: 85%;
+    height: auto;
+    display: block;
+    margin: 5px auto;
+    margin-top: -130px;
+    margin-bottom: -125px;
+}

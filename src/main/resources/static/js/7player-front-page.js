@@ -6,13 +6,14 @@ let players = [], myRole = null, leaderId = null, currentRound = 1, selectedOrde
 
 if (!window.stompClient) window.stompClient = null;
 
-/* ========= 6 人版固定座標 ========= */
+/* ========= 7 人版固定座標 ========= */
 const positions = [
   { top: '3%',   left: '50%', transform: 'translateX(-50%)' },
   { top: '20%',  right: '10%' },
-  { top: '60%',  right: '10%' },
-  { bottom:'3%', left: '50%', transform: 'translateX(-50%)' },
-  { top: '60%',  left: '10%' },
+  { top: '50%',  right: '3%' },
+  { bottom:'10%', right: '30%' },
+  { bottom:'10%', left: '30%' },
+  { top: '50%',  left: '3%' },
   { top: '20%',  left: '10%' }
 ];
 
@@ -50,7 +51,7 @@ function renderPlayers(arr) {
     `;
     container.appendChild(card);
   });
-  // **只有當前領袖能看到選人按鈕**
+  // 只有領袖看得到選人按鈕
   document.getElementById("leader-action")
           .classList.toggle("hidden", leaderId !== playerName);
 }
@@ -115,7 +116,7 @@ async function confirmSelection() {
   }
 }
 
-/* ========= 角色 & WebSocket ========= */
+/* ========= 角色 & WS ========= */
 function applyRolesToPlayers(map) {
   players = players.map(p => ({ ...p, role: map[p.name]?.name }));
   renderPlayers(players);
@@ -147,18 +148,18 @@ function connectWebSocket() {
   const cli = window.stompClient;
   if (cli.connected) return;
   cli.connect({}, () => {
-    // 遊戲開始 → 取得角色
+    // 1) 遊戲開始 → 拿角色
     cli.subscribe(`/topic/room/${roomId}`, async msg => {
       if (msg.body.trim() === "startRealGame") {
         await fetchAssignedRoles();
       }
     });
-    // **訂閱領袖推播** → 更新 leaderId 並重畫
+    // 2) 領袖更新 → 重畫
     cli.subscribe(`/topic/leader/${roomId}`, msg => {
       leaderId = msg.body;
       renderPlayers(players);
     });
-    // 投票開始 → 跳轉投票頁
+    // 3) 投票開始 → 跳轉投票頁
     cli.subscribe(`/topic/vote/${roomId}`, () => {
       window.location.href = `/vote?roomId=${roomId}`;
     });

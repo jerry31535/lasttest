@@ -26,11 +26,10 @@ public class RoomService {
 
     /* ---------- 角色指派 & 領袖 ---------- */
     public Room assignRoles(String roomId) {
-
         Room room = roomRepo.findById(roomId)
                             .orElseThrow(() -> new RuntimeException("Room not found"));
 
-        /* 若尚未指派角色 → 給角色列表後隨機分配 */
+        // 如果還沒指派過
         if (room.getAssignedRoles() == null || room.getAssignedRoles().isEmpty()) {
             int n = room.getPlayerCount();
             List<Room.RoleInfo> roles = switch (n) {
@@ -49,20 +48,65 @@ public class RoomService {
                     new Room.RoleInfo("潛伏者",     "badpeople1.png"),
                     new Room.RoleInfo("邪惡平民",   "badpeople4.png")
                 );
-                default -> throw new RuntimeException("尚未支援此人數的遊戲模式");
+                case 7 -> Arrays.asList(
+                    new Room.RoleInfo("指揮官",     "goodpeople3.png"),
+                    new Room.RoleInfo("工程師",     "goodpeople1.png"),
+                    new Room.RoleInfo("醫護兵",     "goodpeople2.png"),
+                    new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                    new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                    new Room.RoleInfo("破壞者",     "badpeople2.png"),
+                    new Room.RoleInfo("邪惡平民",   "badpeople4.png")
+                );
+                case 8 -> Arrays.asList(
+                    new Room.RoleInfo("指揮官",     "goodpeople3.png"),
+                    new Room.RoleInfo("工程師",     "goodpeople1.png"),
+                    new Room.RoleInfo("醫護兵",     "goodpeople2.png"),
+                    new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                    new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                    new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                    new Room.RoleInfo("破壞者",     "badpeople2.png"),
+                    new Room.RoleInfo("邪惡平民",   "badpeople4.png")
+                );
+                case 9 -> Arrays.asList(
+                    new Room.RoleInfo("指揮官",     "goodpeople3.png"),
+                    new Room.RoleInfo("工程師",     "goodpeople1.png"),
+                    new Room.RoleInfo("醫護兵",     "goodpeople2.png"),
+                    new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                    new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                    new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                    new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                    new Room.RoleInfo("破壞者",     "badpeople2.png"),
+                    new Room.RoleInfo("影武者",     "badpeople3.png")
+                );
+                case 10 -> Arrays.asList(
+                    new Room.RoleInfo("指揮官",     "goodpeople3.png"),
+                    new Room.RoleInfo("工程師",     "goodpeople1.png"),
+                    new Room.RoleInfo("醫護兵",     "goodpeople2.png"),
+                    new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                    new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                    new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                    new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                    new Room.RoleInfo("破壞者",     "badpeople2.png"),
+                    new Room.RoleInfo("影武者",     "badpeople3.png"),
+                    new Room.RoleInfo("邪惡平民",   "badpeople4.png")
+                );
+                default -> throw new RuntimeException("尚未支援 " + n + " 人的遊戲模式");
             };
 
+            Collections.shuffle(roles);
             List<String> names = new ArrayList<>(room.getPlayers());
             Collections.shuffle(names);
-            Collections.shuffle(roles);
-
-            Map<String,Room.RoleInfo> assigned = new HashMap<>();
-            for (int i = 0; i < names.size(); i++) assigned.put(names.get(i), roles.get(i));
+            Map<String, Room.RoleInfo> assigned = new HashMap<>();
+            for (int i = 0; i < names.size(); i++) {
+                assigned.put(names.get(i), roles.get(i));
+            }
             room.setAssignedRoles(assigned);
         }
 
-        /* 隨機領袖 */
-        List<String> valid = room.getPlayers().stream().filter(s -> !s.isBlank()).toList();
+        // 再隨機選領袖
+        List<String> valid = room.getPlayers().stream()
+                                 .filter(s -> !s.isBlank())
+                                 .toList();
         String picked = valid.get(new Random().nextInt(valid.size()));
         room.setCurrentLeader(picked);
 
@@ -70,6 +114,10 @@ public class RoomService {
         ws.convertAndSend("/topic/leader/" + roomId, picked);
         return room;
     }
+
+    // ... 其餘投票流程不變 ...
+
+
 
     /* =========================================================
        🔥  投  票  流  程

@@ -169,64 +169,125 @@ public class RoomController {
 
     /* -------------------- 角色一次分配（舊流程） -------------------- */
 
-    @PostMapping("/start-real-game")
-public ResponseEntity<Map<String, Room.RoleInfo>> startRealGame(@RequestParam String roomId,
-                                                                @RequestParam String playerName) {
-
-    Optional<Room> opt = roomRepository.findById(roomId);
-    if (opt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-
-    Room room = opt.get();
-    if (room.getAssignedRoles() != null && !room.getAssignedRoles().isEmpty())
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(room.getAssignedRoles());
-
-    List<String> players = new ArrayList<>(room.getPlayers());
-
-    List<Room.RoleInfo> roles;
-
-    switch (players.size()) {
-        case 5:
-            roles = new ArrayList<>(Arrays.asList(
-                new Room.RoleInfo("工程師", "goodpeople1.png"),
-                new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
-                new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
-                new Room.RoleInfo("潛伏者", "badpeople1.png"),
-                new Room.RoleInfo("邪惡平民", "badpeople4.png")
-            ));
-            break;
-
-        case 6:
-            roles = new ArrayList<>(Arrays.asList(
-                new Room.RoleInfo("指揮官",     "goodpeople3.png"),
-                new Room.RoleInfo("工程師",     "goodpeople1.png"),
-                new Room.RoleInfo("普通倖存者","goodpeople4.png"),
-                new Room.RoleInfo("普通倖存者","goodpeople4.png"),
-                new Room.RoleInfo("潛伏者",     "badpeople1.png"),
-                new Room.RoleInfo("邪惡平民",   "badpeople4.png")
-            ));
-            break;
-
-        default:
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", new Room.RoleInfo("錯誤", "尚未支援此人數的遊戲模式")));
-    }
-
-    if (roles.size() != players.size())
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                             .body(Map.of("error", new Room.RoleInfo("錯誤", "角色數量與玩家人數不符")));
-
-    Collections.shuffle(players);
-    Collections.shuffle(roles);
-
-    Map<String, Room.RoleInfo> assigned = new HashMap<>();
-    for (int i = 0; i < players.size(); i++) assigned.put(players.get(i), roles.get(i));
-
-    room.setAssignedRoles(assigned);
-    roomRepository.save(room);
-    simpMessagingTemplate.convertAndSend("/topic/room/" + roomId, "startRealGame");
-
-    return ResponseEntity.ok(assigned);
-}
+        /** 角色一次分配（舊流程，改成 5–10 人都支援） */
+        @PostMapping("/start-real-game")
+        public ResponseEntity<Map<String, Room.RoleInfo>> startRealGame(
+                @RequestParam String roomId,
+                @RequestParam String playerName) {
+    
+            Optional<Room> opt = roomRepository.findById(roomId);
+            if (opt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            Room room = opt.get();
+    
+            // 如果已指派過，就直接回傳舊結果
+            if (room.getAssignedRoles() != null && !room.getAssignedRoles().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                                     .body(room.getAssignedRoles());
+            }
+    
+            List<String> players = new ArrayList<>(room.getPlayers());
+            List<Room.RoleInfo> roles;
+    
+            switch (players.size()) {
+                case 5:
+                    roles = Arrays.asList(
+                        new Room.RoleInfo("工程師",      "goodpeople1.png"),
+                        new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
+                        new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
+                        new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                        new Room.RoleInfo("邪惡平民",   "badpeople4.png")
+                    );
+                    break;
+                case 6:
+                    roles = Arrays.asList(
+                        new Room.RoleInfo("指揮官",     "goodpeople3.png"),
+                        new Room.RoleInfo("工程師",     "goodpeople1.png"),
+                        new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                        new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                        new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                        new Room.RoleInfo("邪惡平民",   "badpeople4.png")
+                    );
+                    break;
+                case 7:
+                    roles = Arrays.asList(
+                        new Room.RoleInfo("指揮官",     "goodpeople3.png"),
+                        new Room.RoleInfo("工程師",     "goodpeople1.png"),
+                        new Room.RoleInfo("醫護兵",     "goodpeople2.png"),
+                        new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                        new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                        new Room.RoleInfo("破壞者",     "badpeople2.png"),
+                        new Room.RoleInfo("邪惡平民",   "badpeople4.png")
+                    );
+                    break;
+                case 8:
+                    roles = Arrays.asList(
+                        new Room.RoleInfo("指揮官",     "goodpeople3.png"),
+                        new Room.RoleInfo("工程師",     "goodpeople1.png"),
+                        new Room.RoleInfo("醫護兵",     "goodpeople2.png"),
+                        new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                        new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                        new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                        new Room.RoleInfo("破壞者",     "badpeople2.png"),
+                        new Room.RoleInfo("邪惡平民",   "badpeople4.png")
+                    );
+                    break;
+                case 9:
+                    roles = Arrays.asList(
+                        new Room.RoleInfo("指揮官",     "goodpeople3.png"),
+                        new Room.RoleInfo("工程師",     "goodpeople1.png"),
+                        new Room.RoleInfo("醫護兵",     "goodpeople2.png"),
+                        new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                        new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                        new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                        new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                        new Room.RoleInfo("破壞者",     "badpeople2.png"),
+                        new Room.RoleInfo("影武者",     "badpeople3.png")
+                    );
+                    break;
+                case 10:
+                    roles = Arrays.asList(
+                        new Room.RoleInfo("指揮官",     "goodpeople3.png"),
+                        new Room.RoleInfo("工程師",     "goodpeople1.png"),
+                        new Room.RoleInfo("醫護兵",     "goodpeople2.png"),
+                        new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                        new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                        new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                        new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                        new Room.RoleInfo("破壞者",     "badpeople2.png"),
+                        new Room.RoleInfo("影武者",     "badpeople3.png"),
+                        new Room.RoleInfo("邪惡平民",   "badpeople4.png")
+                    );
+                    break;
+                default:
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                         .body(Map.of("error",
+                                              new Room.RoleInfo("錯誤", "尚未支援此人數的遊戲模式")));
+            }
+    
+            // 安全檢查
+            if (roles.size() != players.size()) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                     .body(Map.of("error",
+                                         new Room.RoleInfo("錯誤", "角色數量與玩家人數不符")));
+            }
+    
+            Collections.shuffle(players);
+            Collections.shuffle(roles);
+    
+            Map<String, Room.RoleInfo> assigned = new HashMap<>();
+            for (int i = 0; i < players.size(); i++) {
+                assigned.put(players.get(i), roles.get(i));
+            }
+    
+            room.setAssignedRoles(assigned);
+            roomRepository.save(room);
+            simpMessagingTemplate.convertAndSend("/topic/room/" + roomId, "startRealGame");
+    
+            return ResponseEntity.ok(assigned);
+        }
+    
 
     /* -------------------- 取玩家列表 -------------------- */
 

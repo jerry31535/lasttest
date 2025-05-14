@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <title>六人遊戲開始畫面</title>
+  <title>十人遊戲開始畫面</title>
   <link rel="stylesheet" href="/css/5player-front-page.css" />
   <link rel="stylesheet" href="/css/chatroom.css" />
   <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
@@ -14,7 +14,6 @@
   <div class="top-right">
     <img src="/images/setting.png" alt="設定" class="icon" />
   </div>
-
   <div class="player-circle" id="player-container"></div>
 
   <div class="bottom-left">
@@ -24,12 +23,10 @@
     <img src="/images/chat.png" alt="聊天室" class="icon" />
   </div>
 
-  <!-- 領袖專用：選擇出戰人員 -->
   <div class="bottom-center hidden" id="leader-action">
     <button id="select-expedition-btn" class="action-btn">選擇出戰人員</button>
   </div>
 
-  <!-- 角色顯示彈窗 -->
   <div id="role-popup" class="popup hidden">
     <div class="popup-content">
       <h2 id="role-title"></h2>
@@ -38,7 +35,6 @@
     </div>
   </div>
 
-  <!-- 聊天室覆蓋層 -->
   <div id="chat-overlay" class="overlay hidden">
     <div class="chatroom">
       <button id="close-btn">&times;</button>
@@ -50,7 +46,6 @@
     </div>
   </div>
 
-  <!-- 出戰人員選擇彈窗 -->
   <div id="select-modal" class="select-modal hidden">
     <div class="select-box">
       <button class="close-btn" onclick="closeSelectModal()">×</button>
@@ -60,7 +55,7 @@
     </div>
   </div>
 
-  <script src="/js/6player-front-page.js" defer></script>
+  <script src="/js/10player-front-page.js" defer></script>
   <script src="/js/chatroom.js" defer></script>
 </body>
 </html>

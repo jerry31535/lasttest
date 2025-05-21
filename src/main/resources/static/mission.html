@@ -1,30 +1,28 @@
-<!-- /static/mission-5.html -->
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <title>任務選擇</title>
-  <link rel="stylesheet" href="/css/mission-5.css">
+  <link rel="stylesheet" href="/css/mission.css">
   <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
 <body>
   <div id="choice-panel" class="hidden">
     <h1>請選擇任務結果卡</h1>
+    <div class="btn-group">
+      <button id="success-btn"></button>
+      <button id="fail-btn"></button>
+    </div>
+    <div class="confirm-group">
+      <button id="confirm-btn" disabled>確認</button>
+    </div>
+  </div>
 
-<div class="btn-group">
-  <button id="success-btn"></button>
-  <button id="fail-btn"></button>
-</div>
-
-<div class="confirm-group">
-  <button id="confirm-btn" disabled>確認</button>
-</div>
-
-<div id="waiting-panel" class="hidden">
+  <div id="waiting-panel" class="hidden">
     <h1>等待結果中…</h1>
-</div>
+  </div>
 
-  <script src="/js/mission-5.js" defer></script>
+  <script src="/js/mission.js" defer></script>
 </body>
 </html>

@@ -117,7 +117,7 @@ function connectWebSocket() {
           .then(res => res.json())
           .then(roomData => {
             const playerCount = roomData.playerCount;
-            window.location.href = `/${playerCount}player-front-page.html?roomId=${roomId}`;
+            window.location.href = `/game-front-page.html?roomId=${roomId}`;
           })
           .catch(err => {
             console.error("❌ 取得房間資訊失敗", err);

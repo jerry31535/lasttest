@@ -376,7 +376,7 @@ public class RoomController {
     }
     @GetMapping("/game-start/{roomId}")
     public String gameStart(@PathVariable String roomId){
-    return "5player-front-page";   // 或你真正的遊戲模板名
+    return "game-front-page";   // 或你真正的遊戲模板名
 }
 
 }

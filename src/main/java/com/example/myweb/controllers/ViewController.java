@@ -9,6 +9,6 @@ public class ViewController {
 
     @GetMapping("/game-play/{roomId}")
     public String redirectToFrontPage(@PathVariable String roomId) {
-        return "redirect:/5player-front-page.html?roomId=" + roomId;
+        return "redirect://game-front-page.html?roomId=" + roomId;
     }
 }

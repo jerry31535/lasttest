@@ -1,4 +1,4 @@
-/* ========= 全域變數 ========= */
+// /js/vote.js
 const urlParams  = new URLSearchParams(window.location.search);
 const roomId     = urlParams.get("roomId");
 const playerName = sessionStorage.getItem("playerName");
@@ -13,18 +13,17 @@ const confirmBtn    = document.getElementById("confirm-btn");
 const statusEl      = document.getElementById("status");
 const expeditionBox = document.getElementById("expedition-container");
 
-let players   = [];         // 從後端 /players 取得的 {name, avatar}
-let expedition = [];        // 目前被提名玩家名單
+let players    = [];
+let expedition = [];
 let canVote    = false;
 let hasVoted   = false;
 let agree      = 0;
 let reject     = 0;
 let selectedVote = null;
 
-/* ========= 後端 API ========= */
 async function fetchPlayers() {
   const res = await fetch(`/api/room/${roomId}/players`);
-  players   = await res.json();  // [{name, avatar}, ...]
+  players   = await res.json();
 }
 
 function renderExpedition(list) {
@@ -43,11 +42,9 @@ function renderExpedition(list) {
   });
 }
 
-/* ========= UI 更新 ========= */
 function updateUI() {
   agreeCountEl.textContent  = agree;
   rejectCountEl.textContent = reject;
-
   if (canVote && !hasVoted) {
     btnBox.classList.remove("hidden");
     resultBox.classList.add("hidden");
@@ -57,7 +54,6 @@ function updateUI() {
   }
 }
 
-/* ========= 送出投票 ========= */
 async function sendVote(value) {
   if (hasVoted) return;
   disableButtons();
@@ -80,14 +76,11 @@ function disableButtons() {
   agreeBtn.disabled = rejectBtn.disabled = confirmBtn.disabled = true;
 }
 
-/* ========= WebSocket ========= */
 function connectWS() {
   const stomp = Stomp.over(new SockJS("/ws"));
-
   stomp.connect({}, () => {
     stomp.subscribe(`/topic/vote/${roomId}`, msg => {
       const data = JSON.parse(msg.body);
-
       agree      = data.agree;
       reject     = data.reject;
       expedition = data.expedition || expedition;
@@ -95,46 +88,32 @@ function connectWS() {
       updateUI();
 
       if (data.finished) {
-          resultBox.classList.remove("hidden");
-          btnBox.classList.add("hidden");
-          statusEl.textContent = "投票結束，結果：" + (agree > reject ? "通過" : "失敗");
-
+        resultBox.classList.remove("hidden");
+        btnBox.classList.add("hidden");
+        statusEl.textContent = "投票結束，結果：" + (agree > reject ? "通過" : "失敗");
+        setTimeout(() => {
           if (agree > reject) {
-            // 任務通過 → 所有人跳到 mission
-            setTimeout(() => {
-              window.location.replace(
-                `/mission-5.html?roomId=${encodeURIComponent(roomId)}`
-              );
-            }, 1000);
+            window.location.replace(`/mission.html?roomId=${encodeURIComponent(roomId)}`);
           } else {
-            // 任務失敗 → 回主畫面
-            setTimeout(() => {
-              window.location.replace(
-                `/5player-front-page.html?roomId=${encodeURIComponent(roomId)}`
-              );
-            }, 2000);
+            window.location.replace(`/game-front-page.html?roomId=${encodeURIComponent(roomId)}`);
           }
-        }
-
+        }, 1500);
+      }
     });
   });
 }
 
-/* ========= 初始化 ========= */
 async function init() {
   await fetchPlayers();
-
   try {
     const res = await fetch(`/api/room/${roomId}/vote-state?player=${encodeURIComponent(playerName)}`);
     if (!res.ok) throw new Error();
     const data = await res.json();
-
     agree      = data.agree;
     reject     = data.reject;
     canVote    = data.canVote;
     hasVoted   = data.hasVoted;
     expedition = data.expedition || [];
-
     renderExpedition(expedition);
     updateUI();
     connectWS();
@@ -143,19 +122,20 @@ async function init() {
   }
 }
 
-/* ========= 事件繫結 ========= */
 agreeBtn.addEventListener("click", () => {
   if (hasVoted) return;
   selectedVote = true;
   agreeBtn.classList.add("selected");
   rejectBtn.classList.remove("selected");
 });
+
 rejectBtn.addEventListener("click", () => {
   if (hasVoted) return;
   selectedVote = false;
   rejectBtn.classList.add("selected");
   agreeBtn.classList.remove("selected");
 });
+
 confirmBtn.addEventListener("click", () => {
   if (selectedVote === null || hasVoted) {
     alert("請先選擇同意或反對！");

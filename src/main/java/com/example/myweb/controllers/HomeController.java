@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class HomeController {
     @GetMapping("/game-start")
     public String gameStartQuery(@RequestParam String roomId) {
-        return "5player-front-page";   // 遊戲主畫面模板
+        return "game-front-page";   // 遊戲主畫面模板
     }
     @GetMapping("/game-start/{roomId}")
     public String gameStart(@PathVariable String roomId) {
@@ -77,6 +77,6 @@ public class HomeController {
     }
     @GetMapping("/vote")
     public String vote() {
-        return "vote-5";
+        return "vote";
     }
 }

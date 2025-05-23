@@ -17,27 +17,36 @@ const positionMap = {
     {top:'40%',right:'20%'},
     {bottom:'30px',left:'50%',transform:'translateX(-50%)'}
   ],
-  6: [ { top: '3%',   left: '50%', transform: 'translateX(-50%)' },
-  { top: '20%',  right: '10%' },
-  { top: '60%',  right: '10%' },
-  { bottom:'3%', left: '50%', transform: 'translateX(-50%)' },
-  { top: '60%',  left: '10%' },
-  { top: '20%',  left: '10%' }],
-  7: [{ top: '3%',   left: '50%', transform: 'translateX(-50%)' },
-  { top: '20%',  right: '10%' },
-  { top: '50%',  right: '3%' },
-  { bottom:'10%', right: '30%' },
-  { bottom:'10%', left: '30%' },
-  { top: '50%',  left: '3%' },
-  { top: '20%',  left: '10%' }],
-  8: [{ top: '3%',   left: '50%', transform: 'translateX(-50%)' }, 
-  { top: '10%',  right: '10%' },                              
-  { top: '40%',  right: '3%' },                               
-  { bottom:'10%', right: '10%' },                             
-  { bottom:'3%',  left: '50%', transform: 'translateX(-50%)'},
-  { bottom:'10%', left: '10%' },                              
-  { top: '40%',  left: '3%' },                                
-  { top: '10%',  left: '10%' }],
+  6: [ 
+    { top: '55%',  left: '15%' },
+    { top: '15%',  left: '15%' },
+    { top: '3%',   left: '50%', transform: 'translateX(-50%)' },
+  { top: '15%',  right: '15%' },
+  { top: '55%',  right: '15%' },
+  { bottom:'5%', left: '50%', transform: 'translateX(-50%)' },
+],
+ 7: [
+  { top: '55%', left: '75%' },  // 4: 玩家5（右中）
+  { top: '15%', left: '75%' },  // 5: 玩家6（右上）
+  { top: '5%',  right:'55%'},  // 6: 玩家7（上方偏右
+  { top: '5%',  left:'55%' },  // 0: 玩家1（上方偏左）
+  { top: '15%', left: '10%' },  // 1: 玩家2（左上）
+  { top: '55%', left: '10%' },  // 2: 玩家3（左中）
+  { bottom: '30px', left: '50%', transform: 'translateX(-50%)' }, //自己
+],
+
+  8: [ 
+  { bottom:'10%', left: '25%' },                              
+  { top: '30%',  left: '10%' },                                
+  { top: '10%',  left: '25%' },
+  { top: '5%',   left: '50%', transform: 'translateX(-50%)' }, 
+  { top: '10%',  right: '25%' },                              
+  { top: '30%',  right: '10%' },                               
+  { bottom:'10%', right: '25%' },                             
+  { bottom:'5%',  left: '50%', transform: 'translateX(-50%)'},
+ 
+],
+
   9: [{ top: '3%',   left: '50%', transform: 'translateX(-50%)' }, 
   { top: '10%',  right: '20%' },                             
   { top: '30%',  right: '3%' },                              

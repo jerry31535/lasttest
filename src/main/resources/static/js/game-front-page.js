@@ -47,15 +47,18 @@ const positionMap = {
  
 ],
 
-  9: [{ top: '3%',   left: '50%', transform: 'translateX(-50%)' }, 
-  { top: '10%',  right: '20%' },                             
-  { top: '30%',  right: '3%' },                              
-  { top: '60%',  right: '3%' },                              
-  { bottom:'10%', right: '20%' },                            
-  { bottom:'3%',  left: '50%', transform: 'translateX(-50%)'},
-  { bottom:'10%', left: '20%' },                             
-  { top: '60%',  left: '3%' },                               
-  { top: '30%',  left: '3%' } ],
+  9: [
+  { bottom:'8%', left: '30%' },                             
+  { bottom:'15%',  left: '15%' },                               
+  { bottom: '55%',  left: '20%' } ,
+  { top: '5%',  left: '35%'},
+  { top: '5%',  right: '35%' },                         
+  { bottom: '55%',  right: '20%' },                              
+  { bottom:'15%',  right: '15%' },                              
+  { bottom:'8%', right: '30%' },                            
+  { bottom:'5%',  left: '50%', transform: 'translateX(-50%)'},
+  ],
+
   10: [{ top:'3%',   left:'50%', transform:'translateX(-50%)' }, 
   { top:'10%',  right:'15%' },                             
   { top:'30%',  right:'3%' },                              

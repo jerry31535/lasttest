@@ -8,19 +8,24 @@
   <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
 <body>
-  <div id="vote-container">
+    <div id="vote-container">
+
+    <!-- ✅ 建議把倒數計時放在最上方 -->
+    <div id="timer">剩餘時間：<span id="countdown">15</span> 秒</div>
+
+
     <h1>投票階段</h1>
 
     <!-- 出戰玩家卡牌 -->
     <div id="expedition-container" class="expedition"></div>
 
-    <!-- 票數顯示區（全員投完才顯示） -->
+    <!-- 票數顯示區 -->
     <div id="vote-result" class="hidden">
       <p>同意票：<span id="agree-count">0</span></p>
       <p>反對票：<span id="reject-count">0</span></p>
     </div>
 
-    <!-- 投票按鈕區 -->
+    <!-- 投票按鈕 -->
     <div id="vote-buttons" class="hidden">
       <button id="agree-btn">同意</button>
       <button id="reject-btn">反對</button>
@@ -29,7 +34,9 @@
 
     <!-- 狀態文字 -->
     <p id="status"></p>
+
   </div>
+
 
   <script src="/js/vote.js" defer></script>
 </body>

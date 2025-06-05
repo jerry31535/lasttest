@@ -378,5 +378,29 @@ public class RoomController {
     public String gameStart(@PathVariable String roomId){
     return "game-front-page";   // 或你真正的遊戲模板名
 }
+    @GetMapping("/room/{roomId}/vote-result")
+    public ResponseEntity<Map<String, Integer>> getVoteResult(@PathVariable String roomId) {
+        Room room = roomService.getRoomById(roomId);
+        if (room == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        int agree = 0;
+        int reject = 0;
+        Map<String, Boolean> voteMap = room.getVoteMap();
+        if (voteMap != null) {
+            for (Boolean vote : voteMap.values()) {
+                if (vote == null) continue; // 棄票
+                if (vote) agree++;
+                else reject++;
+            }
+        }
+
+        Map<String, Integer> result = new HashMap<>();
+        result.put("agree", agree);
+        result.put("reject", reject);
+        return ResponseEntity.ok(result);
+    }
+
 
 }

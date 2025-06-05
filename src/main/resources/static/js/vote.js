@@ -1,4 +1,3 @@
-// /js/vote.js
 const urlParams  = new URLSearchParams(window.location.search);
 const roomId     = urlParams.get("roomId");
 const playerName = sessionStorage.getItem("playerName");
@@ -12,6 +11,7 @@ const rejectBtn     = document.getElementById("reject-btn");
 const confirmBtn    = document.getElementById("confirm-btn");
 const statusEl      = document.getElementById("status");
 const expeditionBox = document.getElementById("expedition-container");
+const countdownEl   = document.getElementById("countdown");
 
 let players    = [];
 let expedition = [];
@@ -20,6 +20,7 @@ let hasVoted   = false;
 let agree      = 0;
 let reject     = 0;
 let selectedVote = null;
+let timer = null;
 
 async function fetchPlayers() {
   const res = await fetch(`/api/room/${roomId}/players`);
@@ -45,18 +46,12 @@ function renderExpedition(list) {
 function updateUI() {
   agreeCountEl.textContent  = agree;
   rejectCountEl.textContent = reject;
-  if (canVote && !hasVoted) {
-    btnBox.classList.remove("hidden");
-    resultBox.classList.add("hidden");
-  } else {
-    resultBox.classList.remove("hidden");
-    btnBox.classList.add("hidden");
-  }
 }
 
 async function sendVote(value) {
   if (hasVoted) return;
   disableButtons();
+  btnBox.classList.add("hidden");
   statusEl.textContent = "送出中...";
   try {
     const res = await fetch(`/api/room/${roomId}/vote`, {
@@ -66,9 +61,9 @@ async function sendVote(value) {
     });
     if (!res.ok) throw new Error();
     hasVoted = true;
-    statusEl.textContent = "已送出，等待其他玩家...";
+    statusEl.textContent = "已送出";
   } catch {
-    statusEl.textContent = "投票失敗，請重新整理再試";
+    console.error("投票送出失敗");
   }
 }
 
@@ -76,31 +71,44 @@ function disableButtons() {
   agreeBtn.disabled = rejectBtn.disabled = confirmBtn.disabled = true;
 }
 
-function connectWS() {
-  const stomp = Stomp.over(new SockJS("/ws"));
-  stomp.connect({}, () => {
-    stomp.subscribe(`/topic/vote/${roomId}`, msg => {
-      const data = JSON.parse(msg.body);
-      agree      = data.agree;
-      reject     = data.reject;
-      expedition = data.expedition || expedition;
-      renderExpedition(expedition);
-      updateUI();
+async function fetchAndShowResult() {
+  try {
+    const res = await fetch(`/api/room/${roomId}/vote-result`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    agree = data.agree;
+    reject = data.reject;
+    updateUI();
+    resultBox.classList.remove("hidden");
+    btnBox.classList.add("hidden");
+    statusEl.textContent = "投票結束，結果：" + (agree > reject ? "通過" : "失敗");
+    setTimeout(() => {
+      const targetPage = agree > reject
+        ? `/mission.html?roomId=${encodeURIComponent(roomId)}`
+        : `/game-front-page.html?roomId=${encodeURIComponent(roomId)}`;
+      window.location.replace(targetPage);
+    }, 1500);
+  } catch {
+    statusEl.textContent = "無法取得投票結果，請稍後重試";
+  }
+}
 
-      if (data.finished) {
-        resultBox.classList.remove("hidden");
-        btnBox.classList.add("hidden");
-        statusEl.textContent = "投票結束，結果：" + (agree > reject ? "通過" : "失敗");
-        setTimeout(() => {
-          if (agree > reject) {
-            window.location.replace(`/mission.html?roomId=${encodeURIComponent(roomId)}`);
-          } else {
-            window.location.replace(`/game-front-page.html?roomId=${encodeURIComponent(roomId)}`);
-          }
-        }, 1500);
+function startCountdown(seconds) {
+  let remaining = seconds;
+  countdownEl.textContent = remaining;
+  timer = setInterval(() => {
+    remaining--;
+    countdownEl.textContent = remaining;
+
+    if (remaining <= 0) {
+      clearInterval(timer);
+      statusEl.textContent = "投票結束，正在統計結果...";
+      if (!hasVoted) {
+        sendVote(null); // 棄票
       }
-    });
-  });
+      fetchAndShowResult(); // ✅ 不論誰都主動取得結果
+    }
+  }, 1000);
 }
 
 async function init() {
@@ -116,7 +124,12 @@ async function init() {
     expedition = data.expedition || [];
     renderExpedition(expedition);
     updateUI();
-    connectWS();
+
+    if (canVote && !hasVoted) {
+      btnBox.classList.remove("hidden");
+    }
+
+    startCountdown(15); // ✅ 一律倒數，統一統計
   } catch {
     statusEl.textContent = "無法取得投票資訊";
   }

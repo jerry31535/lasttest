@@ -189,4 +189,8 @@ public class RoomService {
                 "expedition", room.getCurrentExpedition()
         );
     }
+    public Room getRoomById(String roomId) {
+    return roomRepo.findById(roomId).orElse(null);
+    }
+
 }

@@ -128,3 +128,15 @@ h1 {
 .hidden {
   display: none;
 }
+
+#timer {
+  position: fixed;
+  top: 45px;     /* 原本是 20px，+25 向下 */
+  right: 80px;   /* 原本是 30px，+20 向左 */
+  font-size: 22px;
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 6px 12px;
+  border-radius: 8px;
+  z-index: 10;
+}

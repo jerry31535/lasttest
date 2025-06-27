@@ -21,6 +21,7 @@ let agree      = 0;
 let reject     = 0;
 let selectedVote = null;
 let timer = null;
+let stompClient = null;
 
 async function fetchPlayers() {
   const res = await fetch(`/api/room/${roomId}/players`);
@@ -82,6 +83,7 @@ async function fetchAndShowResult() {
     resultBox.classList.remove("hidden");
     btnBox.classList.add("hidden");
     statusEl.textContent = "投票結束，結果：" + (agree > reject ? "通過" : "失敗");
+
     setTimeout(() => {
       const targetPage = agree > reject
         ? `/mission.html?roomId=${encodeURIComponent(roomId)}`
@@ -106,7 +108,7 @@ function startCountdown(seconds) {
       if (!hasVoted) {
         sendVote(null); // 棄票
       }
-      fetchAndShowResult(); // ✅ 不論誰都主動取得結果
+      fetchAndShowResult();
     }
   }, 1000);
 }
@@ -129,10 +131,29 @@ async function init() {
       btnBox.classList.remove("hidden");
     }
 
-    startCountdown(15); // ✅ 一律倒數，統一統計
+    startCountdown(15);
   } catch {
     statusEl.textContent = "無法取得投票資訊";
   }
+}
+
+// ✅ 加入 WebSocket 監聽，預防投票後直接送任務卡造成錯過跳轉
+function connectWebSocket() {
+  const socket = new SockJS('/ws');
+  stompClient = Stomp.over(socket);
+
+  stompClient.connect({}, () => {
+    console.log("✅ vote.js WebSocket 已連線");
+    stompClient.subscribe(`/topic/room/${roomId}`, msg => {
+      console.log("📩 vote.js 收到訊息：", msg.body);
+      if (msg.body === "allMissionCardsSubmitted") {
+        console.log("🎯 vote.js 準備跳轉 skill.html（任務直接開始）");
+        window.location.href = `/skill.html?roomId=${roomId}`;
+      }
+    });
+  }, err => {
+    console.error("❌ vote.js WebSocket 連線失敗", err);
+  });
 }
 
 agreeBtn.addEventListener("click", () => {
@@ -157,4 +178,7 @@ confirmBtn.addEventListener("click", () => {
   sendVote(selectedVote);
 });
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", () => {
+  init();
+  connectWebSocket(); // ✅ 初始化後連線 WebSocket
+});

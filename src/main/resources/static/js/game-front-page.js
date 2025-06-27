@@ -221,10 +221,16 @@ function connectWebSocket(){
   });
 }
 
-document.addEventListener("DOMContentLoaded",async()=>{
-  await fetch(`/api/room/${roomId}/assign-roles`,{method:'POST'});
+document.addEventListener("DOMContentLoaded", async () => {
   await fetchPlayers();
+
+  // ✅ 僅由房主觸發一次 assign-roles（避免重複）
+  if (players[0]?.name === playerName) {
+    await fetch(`/api/start-real-game?roomId=${roomId}&playerName=${playerName}`, { method: 'POST' });
+
   await fetchAssignedRoles();
-  document.getElementById("select-expedition-btn")?.addEventListener("click",openSelectModal);
+  document.getElementById("select-expedition-btn")?.addEventListener("click", openSelectModal);
   connectWebSocket();
+}
+
 });

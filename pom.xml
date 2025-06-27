@@ -6,7 +6,6 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.4.7</version>
-		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
 	<groupId>com.example</groupId>
@@ -20,6 +19,12 @@
 	</properties>
 
 	<dependencies>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
 		<!-- Spring Boot 基本 Starter -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -68,7 +73,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>3.4.5</version>
 			</plugin>
 		</plugins>
 	</build>

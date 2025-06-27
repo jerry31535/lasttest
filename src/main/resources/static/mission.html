@@ -6,10 +6,13 @@
   <link rel="stylesheet" href="/css/mission.css">
   <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+  <script src="/js/mission.js" defer></script>
 </head>
 <body>
   <div id="choice-panel" class="hidden">
-    <h1>請選擇任務結果卡</h1>
+    <h1 id="mission-title">任務階段</h1>
+    <p id="role-info"></p>
+
     <div class="btn-group">
       <button id="success-btn"></button>
       <button id="fail-btn"></button>
@@ -22,7 +25,5 @@
   <div id="waiting-panel" class="hidden">
     <h1>等待結果中…</h1>
   </div>
-
-  <script src="/js/mission.js" defer></script>
 </body>
 </html>

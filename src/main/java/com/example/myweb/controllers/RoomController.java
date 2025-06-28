@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -225,66 +224,82 @@ public ResponseEntity<Map<String, Room.RoleInfo>> startRealGame(
     List<String> players = new ArrayList<>(room.getPlayers());
     List<Room.RoleInfo> roles;
 
-    roles = switch (players.size()) {
-        case 5 -> Arrays.asList(
-            new Room.RoleInfo("工程師",      "goodpeople1.png"),
-            new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
-            new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
-            new Room.RoleInfo("潛伏者",     "badpeople1.png"),
-            new Room.RoleInfo("邪惡平民",   "badpeople4.png")
-        );
-        case 6 -> Arrays.asList(
-            new Room.RoleInfo("指揮官",     "goodpeople3.png"),
-            new Room.RoleInfo("工程師",     "goodpeople1.png"),
-            new Room.RoleInfo("普通倖存者","goodpeople4.png"),
-            new Room.RoleInfo("普通倖存者","goodpeople4.png"),
-            new Room.RoleInfo("潛伏者",     "badpeople1.png"),
-            new Room.RoleInfo("邪惡平民",   "badpeople4.png")
-        );
-        case 7 -> Arrays.asList(
-            new Room.RoleInfo("指揮官",     "goodpeople3.png"),
-            new Room.RoleInfo("工程師",     "goodpeople1.png"),
-            new Room.RoleInfo("醫護兵",     "goodpeople2.png"),
-            new Room.RoleInfo("普通倖存者","goodpeople4.png"),
-            new Room.RoleInfo("潛伏者",     "badpeople1.png"),
-            new Room.RoleInfo("破壞者",     "badpeople2.png"),
-            new Room.RoleInfo("邪惡平民",   "badpeople4.png")
-        );
-        case 8 -> Arrays.asList(
-            new Room.RoleInfo("指揮官",     "goodpeople3.png"),
-            new Room.RoleInfo("工程師",     "goodpeople1.png"),
-            new Room.RoleInfo("醫護兵",     "goodpeople2.png"),
-            new Room.RoleInfo("普通倖存者","goodpeople4.png"),
-            new Room.RoleInfo("普通倖存者","goodpeople4.png"),
-            new Room.RoleInfo("潛伏者",     "badpeople1.png"),
-            new Room.RoleInfo("破壞者",     "badpeople2.png"),
-            new Room.RoleInfo("邪惡平民",   "badpeople4.png")
-        );
-        case 9 -> Arrays.asList(
-            new Room.RoleInfo("指揮官",     "goodpeople3.png"),
-            new Room.RoleInfo("工程師",     "goodpeople1.png"),
-            new Room.RoleInfo("醫護兵",     "goodpeople2.png"),
-            new Room.RoleInfo("普通倖存者","goodpeople4.png"),
-            new Room.RoleInfo("普通倖存者","goodpeople4.png"),
-            new Room.RoleInfo("普通倖存者","goodpeople4.png"),
-            new Room.RoleInfo("潛伏者",     "badpeople1.png"),
-            new Room.RoleInfo("破壞者",     "badpeople2.png"),
-            new Room.RoleInfo("影武者",     "badpeople3.png")
-        );
-        case 10 -> Arrays.asList(
-            new Room.RoleInfo("指揮官",     "goodpeople3.png"),
-            new Room.RoleInfo("工程師",     "goodpeople1.png"),
-            new Room.RoleInfo("醫護兵",     "goodpeople2.png"),
-            new Room.RoleInfo("普通倖存者","goodpeople4.png"),
-            new Room.RoleInfo("普通倖存者","goodpeople4.png"),
-            new Room.RoleInfo("普通倖存者","goodpeople4.png"),
-            new Room.RoleInfo("潛伏者",     "badpeople1.png"),
-            new Room.RoleInfo("破壞者",     "badpeople2.png"),
-            new Room.RoleInfo("影武者",     "badpeople3.png"),
-            new Room.RoleInfo("邪惡平民",   "badpeople4.png")
-        );
-        default -> throw new IllegalArgumentException("尚未支援此人數的遊戲模式");
-    };
+    switch (players.size()) {
+        case 5:
+            roles = Arrays.asList(
+                new Room.RoleInfo("工程師",      "goodpeople1.png"),
+                new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
+                new Room.RoleInfo("普通倖存者", "goodpeople4.png"),
+                new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                new Room.RoleInfo("邪惡平民",   "badpeople4.png")
+            );
+            break;
+        case 6 :
+            roles = Arrays.asList(
+                new Room.RoleInfo("指揮官",     "goodpeople3.png"),
+                new Room.RoleInfo("工程師",     "goodpeople1.png"),
+                new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                new Room.RoleInfo("邪惡平民",   "badpeople4.png")
+            );
+            break;
+        case 7:
+            roles = Arrays.asList(
+                new Room.RoleInfo("指揮官",     "goodpeople3.png"),
+                new Room.RoleInfo("工程師",     "goodpeople1.png"),
+                new Room.RoleInfo("醫護兵",     "goodpeople2.png"),
+                new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                new Room.RoleInfo("破壞者",     "badpeople2.png"),
+                new Room.RoleInfo("邪惡平民",   "badpeople4.png")
+            );
+            break;
+        case 8:
+            roles = Arrays.asList(
+                new Room.RoleInfo("指揮官",     "goodpeople3.png"),
+                new Room.RoleInfo("工程師",     "goodpeople1.png"),
+                new Room.RoleInfo("醫護兵",     "goodpeople2.png"),
+                new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                new Room.RoleInfo("破壞者",     "badpeople2.png"),
+                new Room.RoleInfo("邪惡平民",   "badpeople4.png")
+            );
+            break;
+        
+        case 9:
+            roles = Arrays.asList(
+                new Room.RoleInfo("指揮官",     "goodpeople3.png"),
+                new Room.RoleInfo("工程師",     "goodpeople1.png"),
+                new Room.RoleInfo("醫護兵",     "goodpeople2.png"),
+                new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                new Room.RoleInfo("破壞者",     "badpeople2.png"),
+                new Room.RoleInfo("影武者",     "badpeople3.png")
+            );
+            break;
+        case 10:
+            roles = Arrays.asList(
+                new Room.RoleInfo("指揮官",     "goodpeople3.png"),
+                new Room.RoleInfo("工程師",     "goodpeople1.png"),
+                new Room.RoleInfo("醫護兵",     "goodpeople2.png"),
+                new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                new Room.RoleInfo("潛伏者",     "badpeople1.png"),
+                new Room.RoleInfo("破壞者",     "badpeople2.png"),
+                new Room.RoleInfo("影武者",     "badpeople3.png"),
+                new Room.RoleInfo("邪惡平民",   "badpeople4.png")
+            );
+            break;
+        default:
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                         .body(Map.of("error",
+                                              new Room.RoleInfo("錯誤", "尚未支援此人數的遊戲模式")));
+    }
 
     // 安全檢查
     if (roles.size() != players.size()) {
@@ -379,17 +394,10 @@ public ResponseEntity<Map<String,Object>> vote(
         @RequestBody Map<String,Object> body) {
 
     String voter = (String) body.get("voter");
-    Boolean agreeObj = (Boolean) body.get("agree");
+    boolean agree = (Boolean) body.get("agree");
 
-    if (voter == null || agreeObj == null) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-            Map.of("success", false, "message", "缺少 voter 或 agree 參數"));
-    }
-
-    boolean agree = agreeObj;
-
-    Map<String,Object> result = roomService.castVote(roomId, voter, agree);
-    return ResponseEntity.ok(result);
+        Map<String,Object> result = roomService.castVote(roomId, voter, agree); // 🔥 修正
+        return ResponseEntity.ok(result);
 }
 
 
@@ -431,138 +439,6 @@ public ResponseEntity<Map<String,Object>> vote(
         result.put("reject", reject);
         return ResponseEntity.ok(result);
     }
-    @GetMapping("/skill/engineer-scan")
-public ResponseEntity<Map<String, Object>> engineerScan(
-        @RequestParam String roomId,
-        @RequestParam String target) {
-
-    Optional<Room> opt = roomRepository.findById(roomId);
-    if (opt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-
-    Room room = opt.get();
-    Room.RoleInfo info = room.getAssignedRoles().get(target);
-    if (info == null) return ResponseEntity.badRequest().build();
-
-    boolean isEvil = info.getName().equals("潛伏者")
-                  || info.getName().equals("破壞者")
-                  || info.getName().equals("影武者")
-                  || info.getName().equals("邪惡平民");
-
-    return ResponseEntity.ok(Map.of("isEvil", isEvil));
-}
-
-@PostMapping("/room/{roomId}/submit-mission")
-public ResponseEntity<?> submitMissionCard(@PathVariable String roomId, @RequestBody Map<String, String> body) {
-    String playerName = body.get("playerName");
-    String result     = body.get("result"); // "success" or "fail"
-
-    Optional<Room> opt = roomRepository.findById(roomId);
-    if (opt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("房間不存在");
-
-    Room room = opt.get();
-
-    if (!room.getCurrentExpedition().contains(playerName)) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("非任務成員不能提交任務卡");
-    }
-
-    room.getMissionCards().put(playerName, result);
-    roomRepository.save(room);
-
-    System.out.println("📝 " + playerName + " 提交了任務卡：" + result);
-    System.out.println("🧾 已提交卡數：" + room.getMissionCards().size() + " / 出任務人數：" + room.getCurrentExpedition().size());
-
-    boolean allSubmitted = room.getMissionCards().size() >= room.getCurrentExpedition().size();
-    if (allSubmitted) {
-    System.out.println("📋 當前 Expedition 名單：" + room.getCurrentExpedition());
-System.out.println("📦 已提交的 Mission Cards：" + room.getMissionCards().keySet());
-
-    simpMessagingTemplate.convertAndSend("/topic/room/" + roomId, "allMissionCardsSubmitted");
-}
-
-
-    return ResponseEntity.ok(Map.of(
-        "success", true,
-        "allSubmitted", allSubmitted
-    ));
-}
-
-
-
-@PostMapping("/room/{roomId}/use-skill")
-public ResponseEntity<Map<String, Object>> useSkill(
-        @PathVariable String roomId,
-        @RequestParam String playerName) {
-
-    Optional<Room> opt = roomRepository.findById(roomId);
-    if (opt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-
-    Room room = opt.get();
-
-    // ✅ 如果該玩家已用過技能就略過
-    if (room.getFinishedSkills().contains(playerName)) {
-        return ResponseEntity.ok(Map.of("success", true, "message", "技能已使用過"));
-    }
-
-    // 加入技能完成名單
-    room.getFinishedSkills().add(playerName);
-    roomRepository.save(room);
-
-    // ✅ 改為檢查「全體玩家」都使用完技能
-    boolean allDone = room.getFinishedSkills().containsAll(room.getPlayers());
-
-    if (allDone) {
-        room.setSkillPhaseFinished(true);
-        roomRepository.save(room);
-        simpMessagingTemplate.convertAndSend("/topic/room/" + roomId, "allSkillUsed");
-    }
-
-    return ResponseEntity.ok(Map.of(
-        "success", true,
-        "allSkillUsed", allDone
-    ));
-}
-@PostMapping("/room/{roomId}/mission-result")
-public ResponseEntity<?> missionResult(@PathVariable String roomId) {
-    Optional<Room> opt = roomRepository.findById(roomId);
-    if (opt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("房間不存在");
-
-    Room room = opt.get();
-
-    // ✅ 1. 計算任務卡成功與失敗數量
-    int success = 0;
-    int fail = 0;
-    for (String result : room.getMissionCards().values()) {
-        if ("success".equals(result)) success++;
-        else if ("fail".equals(result)) fail++;
-    }
-
-    // ✅ 2. 決定是否任務成功（可自訂條件）
-    boolean missionSuccess = (fail == 0);  // 所有人都投 success 才算成功
-
-    // ✅ 3. 廣播結果（你也可以選擇不廣播，直接前端 fetch）
-    simpMessagingTemplate.convertAndSend("/topic/room/" + roomId,
-        missionSuccess ? "missionSuccess" : "missionFail");
-
-    // ✅ 4. 清空所有任務 / 技能 / 投票相關資料
-    room.setMissionCards(new HashMap<>());
-    room.setMissionSubmitted(false);
-    room.setFinishedMissions(new HashSet<>());
-
-    room.setFinishedSkills(new HashSet<>());
-    room.setSkillPhaseFinished(false);
-
-    room.setCurrentExpedition(new ArrayList<>());
-    room.setVoteMap(new HashMap<>());
-
-    roomRepository.save(room);
-
-    // ✅ 5. 回傳結算結果
-    return ResponseEntity.ok(Map.of(
-        "success", missionSuccess,
-        "successCount", success,
-        "failCount", fail
-    ));
-}
 
 }
 

@@ -29,7 +29,7 @@ body {
 #fail-btn{
   width: 270px;
   height: 390px;
-  background: url("/images/card-successful.png") center/cover no-repeat;
+  background: url("/images/card-failure.png") center/cover no-repeat;
   border: none;
   background-size: contain;
 }
@@ -38,7 +38,7 @@ body {
  #success-btn {
   width: 270px;
   height: 390px;
-  background: url("/images/card-failure.png") center/cover no-repeat;
+  background: url("/images/card-successful.png") center/cover no-repeat;
   border: none;
   background-size: contain;
 }
@@ -84,4 +84,9 @@ button.selected {
 
 .hidden {
   display: none;
+}
+button.selected {
+  transform: scale(1.2);
+  z-index: 2;
+  box-shadow: 0 0 12px rgba(0,0,0,0.4);
 }

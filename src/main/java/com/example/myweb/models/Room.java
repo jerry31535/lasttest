@@ -38,6 +38,9 @@ public class Room {
     /** 投票結果：玩家 → true(同意) / false(反對) */
     private Map<String, Boolean> voteMap = new HashMap<>();        // 🔥 新增
 
+    private Map<Integer, MissionRecord> missionResults = new HashMap<>();
+    private Map<String, String> submittedMissionCards = new HashMap<>();
+    private int currentRound = 1;
     /* ========== Getter / Setter ========== */
 
     public String getId() { return id; }
@@ -93,5 +96,28 @@ public class Room {
 
         public String getImage() { return image; }
         public void   setImage(String image) { this.image = image; }
+    }
+    public int getCurrentRound() {
+    return currentRound;
+    }
+
+    public void setCurrentRound(int currentRound) {
+        this.currentRound = currentRound;
+    }
+
+    public Map<Integer, MissionRecord> getMissionResults() {
+        return missionResults;
+    }
+
+    public void setMissionResults(Map<Integer, MissionRecord> missionResults) {
+        this.missionResults = missionResults;
+    }
+
+    public Map<String, String> getSubmittedMissionCards() {
+        return submittedMissionCards;
+    }
+
+    public void setSubmittedMissionCards(Map<String, String> submittedMissionCards) {
+        this.submittedMissionCards = submittedMissionCards;
     }
 }

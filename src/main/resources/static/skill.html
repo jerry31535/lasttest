@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>技能階段</title>
+  <link rel="stylesheet" href="/css/skill.css">
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+  <script src="/js/skill.js" defer></script>
+</head>
+<body>
+  <div id="waiting-panel">
+    <h1>技能階段</h1>
+    <p id="skill-message">等待其他玩家發動技能中...</p>
+  </div>
+
+  <div id="my-skill-panel" class="hidden">
+    <h2>輪到你發動技能了！</h2>
+    <p>（技能功能尚未實作）</p>
+    <button id="use-skill-btn">發動技能</button>
+  </div>
+</body>
+</html>

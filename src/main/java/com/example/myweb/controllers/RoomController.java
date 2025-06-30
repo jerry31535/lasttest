@@ -439,6 +439,16 @@ public ResponseEntity<Map<String,Object>> vote(
         result.put("reject", reject);
         return ResponseEntity.ok(result);
     }
+    @PostMapping("/room/{roomId}/mission-result")
+    public ResponseEntity<Void> submitMissionCard(
+            @PathVariable String roomId,
+            @RequestBody Map<String, String> payload
+    ) {
+        String player = payload.get("player");
+        String result = payload.get("result");
+        roomService.submitMissionCard(roomId, player, result);
+        return ResponseEntity.ok().build();
+    }
 
 }
 

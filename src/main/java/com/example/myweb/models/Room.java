@@ -41,6 +41,17 @@ public class Room {
     private Map<Integer, MissionRecord> missionResults = new HashMap<>();
     private Map<String, String> submittedMissionCards = new HashMap<>();
     private int currentRound = 1;
+
+    private List<String> skillOrder; // 技能順序
+
+    private int skillIndex = 0; // 目前輪到第幾位技能角色（索引）
+    private int skillRound = 0; // 技能回合編號（從0開始，每回合遞增）
+
+
+    private Map<String, Integer> missionSuccess = new HashMap<>();
+    private Map<String, Integer> missionFail = new HashMap<>();
+    private int successCount = 0;
+    private int failCount = 0;
     /* ========== Getter / Setter ========== */
 
     public String getId() { return id; }
@@ -119,5 +130,59 @@ public class Room {
 
     public void setSubmittedMissionCards(Map<String, String> submittedMissionCards) {
         this.submittedMissionCards = submittedMissionCards;
+    }
+    public List<String> getSkillOrder() {
+        return skillOrder;
+    }
+
+    public void setSkillOrder(List<String> skillOrder) {
+        this.skillOrder = skillOrder;
+    }
+
+    public int getSkillIndex() {
+        return skillIndex;
+    }
+
+    public void setSkillIndex(int skillIndex) {
+        this.skillIndex = skillIndex;
+    }
+
+    public int getSkillRound() {
+        return skillRound;
+    }
+
+    public void setSkillRound(int skillRound) {
+        this.skillRound = skillRound;
+    }
+    public Map<String, Integer> getMissionSuccess() {
+        return missionSuccess;
+    }
+
+    public void setMissionSuccess(Map<String, Integer> missionSuccess) {
+        this.missionSuccess = missionSuccess;
+    }
+
+    public Map<String, Integer> getMissionFail() {
+        return missionFail;
+    }
+
+    public void setMissionFail(Map<String, Integer> missionFail) {
+        this.missionFail = missionFail;
+    }
+
+    public int getSuccessCount() {
+        return successCount;
+    }
+
+    public void setSuccessCount(int successCount) {
+        this.successCount = successCount;
+    }
+
+    public int getFailCount() {
+        return failCount;
+    }
+
+    public void setFailCount(int failCount) {
+        this.failCount = failCount;
     }
 }

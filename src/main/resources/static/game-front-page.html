@@ -10,7 +10,8 @@
 </head>
 <body>
 
-  <div class="top-left">第 <span id="round-number">1</span> 輪</div>
+  <!-- ✅ 修改：左上角顯示輪數 -->
+  <div id="round-label" class="top-left">第 1 輪</div>
 
   <div class="top-right">
     <img src="/images/setting.png" alt="設定" class="icon" />
@@ -24,7 +25,7 @@
     <img src="/images/chat.png" alt="聊天室" class="icon" />
   </div>
 
-  <!-- 底中：領袖專用按鈕 -->
+  <!-- 領袖專用按鈕 -->
   <div class="bottom-center hidden" id="leader-action">
     <button id="select-expedition-btn" class="action-btn">選擇出戰人員</button>
   </div>
@@ -60,7 +61,18 @@
     </div>
   </div>
 
+  <!-- ✅ 中央顯示：本回合結果（成功/失敗數） -->
+  <div id="round-result-popup" class="round-popup hidden">
+    <div id="round-result-text"></div>
+  </div>
+
+  <!-- ✅ 右上角統計：總成功與失敗 -->
+  <div id="overall-stats" class="top-right-stats">
+    <div>正方成功：<span id="success-count">0</span></div>
+    <div>反方成功：<span id="fail-count">0</span></div>
+  </div>
+
   <script src="/js/game-front-page.js" defer></script>
   <script src="/js/chatroom.js" defer></script>
 </body>
-</html>
+</html>幫我修改 

@@ -221,12 +221,92 @@ function connectWebSocket(){
   });
 }
 
-document.addEventListener("DOMContentLoaded",async()=>{
-  await fetch(`/api/room/${roomId}/assign-roles`,{method:'POST'});
+function showRoundResult(success, fail) {
+  const resultText = `本回合結果：成功 ${success} 張，失敗 ${fail} 張`;
+  const popup = document.getElementById("round-result-popup");
+  const text = document.getElementById("round-result-text");
+  text.textContent = resultText;
+  popup.classList.remove("hidden");
+
+  setTimeout(() => {
+    popup.classList.add("hidden");
+  }, 5000);
+}
+
+// ✅ 顯示右上角統計數量
+function updateOverallStats(successCount, failCount) {
+  document.getElementById("success-count").textContent = successCount;
+  document.getElementById("fail-count").textContent = failCount;
+}
+
+// ✅ 顯示左上角第 n 輪
+function updateRoundLabel(round) {
+  const label = document.getElementById("round-label");
+  if (label && round) {
+    label.textContent = `第 ${round} 輪`;
+  }
+}
+
+// ✅ 讀取當前回合與成功失敗資訊
+async function fetchMissionSummary() {
+  try {
+    const res = await fetch(`/api/room/${roomId}`);
+    const room = await res.json();
+
+    // ✅ 更新左上角回合與右上角累計數
+    updateRoundLabel(room.currentRound);
+    updateOverallStats(room.successCount || 0, room.failCount || 0);
+
+    // ✅ 若是跳過任務，不顯示彈窗
+    const skip = sessionStorage.getItem("skipMission");
+    if (skip === "true") {
+      sessionStorage.removeItem("skipMission");
+      return;
+    }
+
+    const round = room.currentRound;
+    const lastRound = round - 1;
+
+    if (room.missionResults && room.missionResults[lastRound]) {
+      const { successCount, failCount } = room.missionResults[lastRound];
+      showRoundResult(successCount, failCount);
+    }
+  } catch (err) {
+    console.error("❌ 無法取得任務結果", err);
+  }
+}
+
+// ✅ 頁面載入後執行主邏輯
+document.addEventListener("DOMContentLoaded", async () => {
+  await fetch(`/api/room/${roomId}/assign-roles`, { method: 'POST' });
+
+  try {
+    const res = await fetch(`/api/room/${roomId}`);
+    if (res.ok) {
+      const room = await res.json();
+      localStorage.setItem("roomName", room.roomName || "");
+    }
+  } catch (err) {
+    console.error("❌ 無法取得房間名稱：", err);
+  }
+
   await fetchPlayers();
   await fetchAssignedRoles();
-  document.getElementById("select-expedition-btn")?.addEventListener("click",openSelectModal);
+
+  const playerName = sessionStorage.getItem("playerName");
+  const avatar = sessionStorage.getItem("playerAvatar");
+  if (playerName) localStorage.setItem("username", playerName);
+  if (avatar) localStorage.setItem("selectedAvatar", avatar);
+  const my = players.find(p => p.name === playerName);
+  if (my && my.role) {
+    localStorage.setItem("myRole", my.role);
+  }
+
+  document.getElementById("select-expedition-btn")?.addEventListener("click", openSelectModal);
   connectWebSocket();
+
+  // ✅ 顯示本回合統計與歷史任務結果
+  await fetchMissionSummary();
 });
 
 

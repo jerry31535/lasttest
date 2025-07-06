@@ -132,3 +132,33 @@ body{
 
 .confirm-btn{margin-top:18px;padding:8px 0;border:none;border-radius:8px;
   font-size:18px;background:#e17546;color:#fff;cursor:pointer;}
+.round-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 20px 30px;
+  border-radius: 15px;
+  font-size: 24px;
+  z-index: 9999;
+  text-align: center;
+}
+
+/* ✅ 右上角統計顯示區塊 */
+.top-right-stats {
+  position: fixed;
+  top: 100px; /* ✅ 原本 10px，往下移一點 */
+  right: 20px;
+  background-color: #ffffffdd;
+  padding: 10px 15px;
+  border-radius: 10px;
+  font-weight: bold;
+  color: #333;
+  z-index: 999;
+}
+
+.hidden {
+  display: none;
+}

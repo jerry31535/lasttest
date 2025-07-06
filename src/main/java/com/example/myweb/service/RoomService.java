@@ -8,6 +8,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RoomService {
@@ -183,4 +184,24 @@ public class RoomService {
             ws.convertAndSend("/topic/room/" + roomId, "allMissionCardsSubmitted");
         }
     }
+
+    public List<String> generateSkillOrder(Room room) {
+    // 技能觸發順序固定
+        List<String> fixedOrder = Arrays.asList("影武者", "指揮官", "醫護兵", "潛伏者", "破壞者", "工程師");
+        Set<String> assignedRoles = room.getAssignedRoles().values().stream()
+                .map(roleInfo -> roleInfo.getName()) // 假設 RoleInfo 有 getName()
+                .collect(Collectors.toSet());
+
+        List<String> result = new ArrayList<>();
+        for (String role : fixedOrder) {
+            if (assignedRoles.contains(role)) {
+                result.add(role);
+            }
+        }
+        room.setSkillOrder(result);
+        roomRepo.save(room);
+        return result;
+    }
+    
+
 }

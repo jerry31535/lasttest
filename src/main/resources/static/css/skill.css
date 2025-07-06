@@ -1,0 +1,56 @@
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: url('/images/game-background.png') center/cover no-repeat;
+  height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: white;
+  text-align: center;
+  background-attachment: fixed;
+}
+
+#waiting-panel, #my-skill-panel {
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 40px 60px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+}
+
+h1, h2 {
+  font-size: 32px;
+  margin-bottom: 16px;
+}
+
+#skill-message,
+#skill-role-label {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #f0f0f0;
+}
+
+button {
+  padding: 12px 28px;
+  font-size: 18px;
+  border: none;
+  border-radius: 8px;
+  background-color: #e17546;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover:not(:disabled) {
+  background-color: #d45f2a;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hidden {
+  display: none !important;
+}

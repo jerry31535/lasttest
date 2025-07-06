@@ -82,13 +82,22 @@ async function fetchAndShowResult() {
     updateUI();
     resultBox.classList.remove("hidden");
     btnBox.classList.add("hidden");
-    statusEl.textContent = "投票結束，結果：" + (agree > reject ? "通過" : "失敗");
+
+    const passed = agree > reject;
+    statusEl.textContent = `投票結束，結果：${passed ? "通過" : "失敗"}`;
+
+    // ✅ 廣播給其他人 votePassed / voteFailed
+    if (stompClient && stompClient.connected) {
+      stompClient.send(`/app/vote/${roomId}`, {}, passed ? "votePassed" : "voteFailed");
+    }
 
     setTimeout(() => {
-      const targetPage = agree > reject
-        ? `/mission.html?roomId=${encodeURIComponent(roomId)}`
-        : `/game-front-page.html?roomId=${encodeURIComponent(roomId)}`;
-      window.location.replace(targetPage);
+      if (passed) {
+        window.location.href = `/mission.html?roomId=${encodeURIComponent(roomId)}`;
+      } else {
+        sessionStorage.setItem("skipMission", "true"); // ✅ 不顯示任務結果彈窗
+        window.location.href = `/game-front-page.html?roomId=${encodeURIComponent(roomId)}`;
+      }
     }, 1500);
   } catch {
     statusEl.textContent = "無法取得投票結果，請稍後重試";
@@ -137,22 +146,31 @@ async function init() {
   }
 }
 
-// ✅ 加入 WebSocket 監聽，預防投票後直接送任務卡造成錯過跳轉
+// ✅ WebSocket：收後端投票結果 → 控制轉場
 function connectWebSocket() {
   const socket = new SockJS('/ws');
   stompClient = Stomp.over(socket);
 
   stompClient.connect({}, () => {
     console.log("✅ vote.js WebSocket 已連線");
+
+    // 任務卡送完 → 跳 skill 階段
     stompClient.subscribe(`/topic/room/${roomId}`, msg => {
-      console.log("📩 vote.js 收到訊息：", msg.body);
       if (msg.body === "allMissionCardsSubmitted") {
-        console.log("🎯 vote.js 準備跳轉 skill.html（任務直接開始）");
         window.location.href = `/skill.html?roomId=${roomId}`;
       }
     });
-  }, err => {
-    console.error("❌ vote.js WebSocket 連線失敗", err);
+
+    // 投票結果廣播 → 跳轉任務或主畫面
+    stompClient.subscribe(`/topic/vote/${roomId}`, msg => {
+      const body = msg.body.trim();
+      if (body === "votePassed") {
+        window.location.href = `/mission.html?roomId=${roomId}`;
+      } else if (body === "voteFailed") {
+        sessionStorage.setItem("skipMission", "true");
+        window.location.href = `/game-front-page.html?roomId=${roomId}`;
+      }
+    });
   });
 }
 
@@ -180,5 +198,5 @@ confirmBtn.addEventListener("click", () => {
 
 document.addEventListener("DOMContentLoaded", () => {
   init();
-  connectWebSocket(); // ✅ 初始化後連線 WebSocket
+  connectWebSocket();
 });

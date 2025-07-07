@@ -71,10 +71,19 @@ const positionMap = {
   { top:'10%',  left:'15%' }]
 };
 
-function getMaxPick(round, count) {
-  if (count <= 6) return round <= 3 ? 2 : 3;
-  if (count <= 8) return round <= 2 ? 3 : 4;
-  return round <= 2 ? 3 : 5;
+const expeditionConfig = {
+    5: { totalRounds: 5, picks: [2, 2, 2, 3, 3] },
+    6: { totalRounds: 6, picks: [2, 2, 3, 3, 4, 3] },
+    7: { totalRounds: 6, picks: [3, 3, 4, 4, 4, 4] },
+    8: { totalRounds: 7, picks: [3, 3, 4, 4, 4, 5, 5] },
+    9: { totalRounds: 7, picks: [4, 4, 4, 5, 5, 5, 5] }
+  };
+function getMaxPick(currentround, count) {
+
+  
+  const config = expeditionConfig[count];
+  if (!config) return 2; // 預設值保險
+  return config.picks[currentround - 1] || config.picks.at(-1);
 }
 
 function reorderPlayers(arr){
@@ -111,6 +120,8 @@ function renderPlayers(arr){
 }
 
 function openSelectModal(){
+  console.log("🔍 開啟選角彈窗 round:", currentRound, "playerCount:", players.length);
+  console.log("🎯 計算出戰人數為：", getMaxPick(currentRound, players.length));
   const maxPick=getMaxPick(currentRound, players.length);
   const candidates=players;
   const listEl=document.getElementById('candidate-list');
@@ -240,10 +251,14 @@ function updateOverallStats(successCount, failCount) {
 }
 
 // ✅ 顯示左上角第 n 輪
-function updateRoundLabel(round) {
+function updateRoundLabel(round, totalRounds) {
   const label = document.getElementById("round-label");
   if (label && round) {
-    label.textContent = `第 ${round} 輪`;
+    if (totalRounds) {
+      label.textContent = `第 ${round} 輪 / 共 ${totalRounds} 輪`;
+    } else {
+      label.textContent = `第 ${round} 輪`;
+    }
   }
 }
 
@@ -253,8 +268,16 @@ async function fetchMissionSummary() {
     const res = await fetch(`/api/room/${roomId}`);
     const room = await res.json();
 
+    currentRound = room.currentRound;
+    const config = expeditionConfig[room.playerCount];
+    const totalRounds = config?.totalRounds || 5; // 預設 5 輪
+    console.log("🧪 playerCount:", room.playerCount);
+    console.log("🧪 totalRounds 檢查:", expeditionConfig[room.playerCount]?.totalRounds);
+    updateRoundLabel(currentRound, totalRounds); 
+
     // ✅ 更新左上角回合與右上角累計數
-    updateRoundLabel(room.currentRound);
+      // ✅ 關鍵：設定全域變數
+   
     updateOverallStats(room.successCount || 0, room.failCount || 0);
 
     // ✅ 若是跳過任務，不顯示彈窗
@@ -270,6 +293,13 @@ async function fetchMissionSummary() {
     if (room.missionResults && room.missionResults[lastRound]) {
       const { successCount, failCount } = room.missionResults[lastRound];
       showRoundResult(successCount, failCount);
+    }
+
+     // ✅ 結束條件
+    if (currentRound > totalRounds) {
+      console.log("🏁 達到最大回合數，跳轉結算");
+      window.location.href = `/game-end.html?roomId=${roomId}`;
+      return;
     }
   } catch (err) {
     console.error("❌ 無法取得任務結果", err);

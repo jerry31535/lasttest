@@ -315,6 +315,8 @@ async function fetchMissionSummary() {
   }
 }
 
+
+
 // ✅ 頁面載入後執行主邏輯
 document.addEventListener("DOMContentLoaded", async () => {
   await fetch(`/api/room/${roomId}/assign-roles`, { method: 'POST' });
@@ -347,5 +349,55 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ✅ 顯示本回合統計與歷史任務結果
   await fetchMissionSummary();
 });
+// ✅ 語音功能
+let mediaRecorder;
+let voiceSocket;
+let voiceEnabled = false;
 
+function toggleVoice() {
+  if (!voiceEnabled) {
+    startVoice();
+    document.getElementById("toggle-voice-btn").innerText = "🛑 關閉語音";
+    voiceEnabled = true;
+  } else {
+    stopVoice();
+    document.getElementById("toggle-voice-btn").innerText = "🎤 開啟語音";
+    voiceEnabled = false;
+  }
+}
+
+function startVoice() {
+  const username = localStorage.getItem("username") || "guest";
+  voiceSocket = new WebSocket(`ws://${location.host}/voice/${username}`);
+
+  voiceSocket.onopen = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = (e) => {
+      if (voiceSocket.readyState === WebSocket.OPEN) {
+        voiceSocket.send(e.data);
+      }
+    };
+    mediaRecorder.start(250);
+    console.log("🎤 語音已啟用");
+  };
+
+  voiceSocket.onmessage = (event) => {
+    const audioBlob = new Blob([event.data], { type: 'audio/webm' });
+    const audioURL = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioURL);
+    audio.play();
+  };
+
+  voiceSocket.onclose = () => {
+    console.log("🛑 語音 WebSocket 關閉");
+  };
+}
+
+function stopVoice() {
+  if (mediaRecorder) mediaRecorder.stop();
+  if (voiceSocket) voiceSocket.close();
+  console.log("🛑 語音已關閉");
+}
+ 
 

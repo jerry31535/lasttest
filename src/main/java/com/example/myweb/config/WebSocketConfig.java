@@ -1,7 +1,7 @@
 package com.example.myweb.config;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
+
 // 匯入相關的 Spring WebSocket 設定類別與註解
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;

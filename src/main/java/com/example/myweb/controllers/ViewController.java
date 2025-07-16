@@ -26,4 +26,9 @@ public class ViewController {
         // 將使用者重導向至前端靜態頁面，並帶上 roomId 查詢參數
         return "redirect://game-front-page.html?roomId=" + roomId;
     }
+    @GetMapping("/voice-test")
+public String voiceTest() {
+    return "voice-test";
+}
+
 }

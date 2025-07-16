@@ -52,6 +52,8 @@ public class Room {
     private Map<String, Integer> missionFail = new HashMap<>();
     private int successCount = 0;
     private int failCount = 0;
+
+    
     /* ========== Getter / Setter ========== */
 
     public String getId() { return id; }

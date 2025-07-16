@@ -413,11 +413,11 @@ public class RoomController {
         return ResponseEntity.ok(state);
     }
     @GetMapping("/game-start/{roomId}")
-    public String gameStart(@PathVariable String roomId){
-    return "game-front-page";   // 或你真正的遊戲模板名
+        public String gameStart(@PathVariable String roomId){
+        return "game-front-page";   // 或你真正的遊戲模板名
 
-    
-}
+        
+    }
     @GetMapping("/room/{roomId}/vote-result")
     public ResponseEntity<Map<String, Integer>> getVoteResult(@PathVariable String roomId) {
         Room room = roomService.getRoomById(roomId);
@@ -460,69 +460,67 @@ public class RoomController {
         List<String> order = roomService.generateSkillOrder(room);
         return ResponseEntity.ok(order);
     }
-    @PostMapping("/room/{roomId}/next-skill")
-    public ResponseEntity<Void> nextSkill(@PathVariable String roomId) {
-        Room room = roomRepository.findById(roomId).orElse(null);
-        if (room == null || room.getSkillOrder() == null) {
-            return ResponseEntity.notFound().build();
+    
+    @GetMapping("/room/{roomId}/skill-state")
+    public ResponseEntity<Map<String, Object>> getSkillState(@PathVariable String roomId) {
+        Optional<Room> roomOpt = roomRepository.findById(roomId);
+        if (roomOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+        Room room = roomOpt.get();
+        Map<String, Object> result = new HashMap<>();
+
+        
+
+        // ✅ 新增：取出目前技能角色順序（預存在 MongoDB 中，例如在 room.skillOrder）
+        List<String> allSkillRoles = room.getSkillOrder();  // 你應該有這個欄位
+        result.put("remainingRoles", allSkillRoles);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/room/{roomId}/skill-finish")
+    public ResponseEntity<?> finishSkillPhase(@PathVariable String roomId) {
+        Optional<Room> roomOpt = roomRepository.findById(roomId);
+        if (roomOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+        Room room = roomOpt.get();
+        int currentRound = room.getCurrentRound();
+        String roundKey = String.valueOf(currentRound);
+
+        // 安全檢查：沒有任務結果就拒絕
+        if (!room.getMissionResults().containsKey(currentRound)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body("尚未結算任務結果，不能結束技能階段");
         }
 
-        int index = room.getSkillIndex();
-        room.setSkillIndex(index + 1);
+        // 從 missionResults 中再取一次這輪統計
+        MissionRecord thisRound = room.getMissionResults().get(currentRound);
+        int success = thisRound.getSuccessCount();
+        int fail = thisRound.getFailCount();
 
-        // 若超過最後一個技能角色 → 重設 index 並跳回主畫面
-        if (room.getSkillIndex() >= room.getSkillOrder().size()) {
-            room.setSkillIndex(0);
-            room.setSkillRound(room.getSkillRound() + 1);
+        // 寫入累積數值
+        room.setSuccessCount(room.getSuccessCount() + success);
+        room.setFailCount(room.getFailCount() + fail);
 
-            // ✅ 取得該回合結果並加總進累積欄位
-            int round = room.getCurrentRound();
-            if (room.getMissionResults() != null && room.getMissionResults().containsKey(round)) {
-                MissionRecord result = room.getMissionResults().get(round);
-                int success = result.getSuccessCount();
-                int fail = result.getFailCount();
+        // 清空技能階段與暫存資料
+        
+        room.getSubmittedMissionCards().clear();
+        room.getMissionSuccess().remove(roundKey);
+        room.getMissionFail().remove(roundKey);
 
-                Integer oldSuccess = room.getSuccessCount();
-                Integer oldFail = room.getFailCount();
-                room.setSuccessCount(oldSuccess + success);
-                room.setFailCount(oldFail + fail);
-            }
+        // 回合推進
+        room.setCurrentRound(currentRound + 1);
 
-            room.setCurrentRound(round + 1); // ✅ 別忘了推進回合數
-            roomRepository.save(room);
+        // 儲存
+        roomRepository.save(room);
 
-            simpMessagingTemplate.convertAndSend("/topic/skill/" + roomId, "allSkillUsed");
-        } else {
-            // 廣播下一位技能角色名稱（如：指揮官）
-            String next = room.getSkillOrder().get(room.getSkillIndex());
-            simpMessagingTemplate.convertAndSend("/topic/skill/" + roomId, "next:" + next);
-            roomRepository.save(room);
-        }
+        // 廣播技能結束
+        simpMessagingTemplate.convertAndSend("/topic/room/" + roomId, "allSkillUsed");
 
         return ResponseEntity.ok().build();
     }
-    @GetMapping("/room/{roomId}/skill-state")
-    public ResponseEntity<Map<String, Object>> getSkillState(@PathVariable String roomId) {
-        Room room = roomRepository.findById(roomId).orElse(null);
-        if (room == null || room.getSkillOrder() == null) {
-            return ResponseEntity.notFound().build();
-        }
 
-        Map<String, Object> response = new HashMap<>();
-        List<String> order = room.getSkillOrder();
-        int index = room.getSkillIndex();
-
-        response.put("currentSkillRole", index < order.size() ? order.get(index) : null);
-        response.put("skillIndex", index);
-        response.put("skillOrder", order);
-        response.put("roundSuccess", room.getMissionSuccess().getOrDefault("round" + room.getSkillRound(), 0));
-        response.put("roundFail", room.getMissionFail().getOrDefault("round" + room.getSkillRound(), 0));
-        response.put("successCount", room.getSuccessCount());
-        response.put("failCount", room.getFailCount());
-
-        return ResponseEntity.ok(response);
-    }
-    
+        
 
 
 

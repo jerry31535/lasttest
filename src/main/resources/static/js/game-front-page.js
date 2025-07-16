@@ -218,8 +218,17 @@ function connectWebSocket(){
 
   stompClient.connect({},()=>{
     stompClient.subscribe(`/topic/room/${roomId}`,async msg=>{
-      if(msg.body.trim()==="startRealGame")await fetchAssignedRoles();
-      window.location.href = `/game-front-page.html?roomId=${roomId}`;
+      const body = msg.body.trim();  // ✅ 加這一行！
+      if (body === "allSkillUsed") {
+        await fetchAssignedRoles();
+        await fetchMissionSummary();
+      }
+
+      // ✅ 原本這些邏輯可以保留：
+      if (body === "startRealGame") {
+        await fetchAssignedRoles();
+        window.location.href = `/game-front-page.html?roomId=${roomId}`;
+      }
     });
     stompClient.subscribe(`/topic/leader/${roomId}`,msg=>{
       leaderId=msg.body;renderPlayers(players);

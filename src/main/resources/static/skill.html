@@ -13,16 +13,35 @@
   <div id="countdown-timer" style="position: fixed; top: 10px; right: 20px; font-size: 20px; color: red;">
     倒數：<span id="timer-value">20</span> 秒
   </div>
+
+  <!-- 等待畫面 -->
   <div id="waiting-panel">
     <h1>技能階段</h1>
     <p id="skill-message">等待其他玩家發動技能中...</p>
   </div>
 
-  <!-- ✅ 原 my-skill-panel 改為顯示技能名稱與按鈕 -->
+  <!-- 技能使用畫面 -->
   <div id="my-skill-panel" class="hidden">
     <h2>輪到你發動技能了！</h2>
     <p id="skill-role-label">角色：???</p>
-    <button id="next-skill-btn">已查看，下一位</button>
+
+    <!-- ✅ 工程師專用顯示區 -->
+    <div id="engineer-panel" class="hidden" style="color: white; font-size: 24px; margin-top: 20px;">
+      <p>本回合成功卡：<span id="success-count">?</span></p>
+      <p>本回合失敗卡：<span id="fail-count">?</span></p>
+    </div>
+
+    <!-- 潛伏者技能畫面 -->
+    <div id="lurker-panel" class="hidden" style="color: white; font-size: 20px; margin-top: 20px;">
+      <p>你可以選擇將其中一位玩家的任務卡「成功 ↔ 失敗」。</p>
+      <select id="lurker-target-select">
+        <option value="">-- 選擇要反轉的玩家 --</option>
+      </select>
+      <br><br>
+      <button id="use-lurker-skill-btn">使用技能</button>
+      <p id="lurker-status-msg"></p>
+    </div>
+
   </div>
 </body>
 </html>

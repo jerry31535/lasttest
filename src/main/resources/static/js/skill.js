@@ -131,16 +131,15 @@ async function fetchLurkerTargets() {
     const cardMap = mission?.cardMap || {};
 
     lurkerSelect.innerHTML = `<option value="">-- 選擇要反轉的玩家 --</option>`;
-    Object.keys(cardMap).forEach(player => {
+    Object.entries(cardMap).forEach(([player, result]) => {
       if (player !== playerName) {
         const option = document.createElement("option");
         option.value = player;
-        option.textContent = `${player}（已提交）`;
+        option.textContent = `${player}：${result === "SUCCESS" ? "✅ 成功" : "❌ 失敗"}`;
         lurkerSelect.appendChild(option);
       }
     });
 
-    // ✅ 若只有預設選項，代表沒有可選擇的對象
     if (lurkerSelect.options.length === 1) {
       lurkerStatus.textContent = "⚠️ 尚無可選擇的對象（可能還未交卡）";
     }

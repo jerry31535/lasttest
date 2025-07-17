@@ -128,7 +128,7 @@ async function fetchLurkerTargets() {
 
     // 該輪任務記錄
     const mission = room.missionResults?.[currentRound];
-    const cardMap = mission?.cardMap || {};  // 假設後端在 MissionRecord 中存的是 player → result
+    const cardMap = mission?.cardMap || {};
 
     lurkerSelect.innerHTML = `<option value="">-- 選擇要反轉的玩家 --</option>`;
     Object.keys(cardMap).forEach(player => {
@@ -139,10 +139,17 @@ async function fetchLurkerTargets() {
         lurkerSelect.appendChild(option);
       }
     });
+
+    // ✅ 若只有預設選項，代表沒有可選擇的對象
+    if (lurkerSelect.options.length === 1) {
+      lurkerStatus.textContent = "⚠️ 尚無可選擇的對象（可能還未交卡）";
+    }
+
   } catch (err) {
     console.error("❌ 潛伏者無法取得任務卡列表", err);
   }
 }
+
 
 
 

@@ -165,25 +165,33 @@ public class RoomService {
 
     /* ==================== 任務卡提交處理 ==================== */
     public void submitMissionCard(String roomId, String player, String result) {
-        Room room = getRoomById(roomId);
-        room.getSubmittedMissionCards().put(player, result);
+    Room room = getRoomById(roomId);
+    room.getSubmittedMissionCards().put(player, result);
+    roomRepo.save(room);
+
+    if (room.getSubmittedMissionCards().size() == room.getCurrentExpedition().size()) {
+        int success = 0, fail = 0;
+        Map<String, String> submitted = room.getSubmittedMissionCards();
+
+        for (String r : submitted.values()) {
+            if ("SUCCESS".equals(r)) success++;
+            else if ("FAIL".equals(r)) fail++;
+        }
+
+        int round = room.getCurrentRound();
+        MissionRecord record = new MissionRecord(success, fail);
+
+        // ✅ 新增：記錄每位玩家交了什麼卡
+        record.setCardMap(new HashMap<>(submitted));
+
+        room.getMissionResults().put(round, record);
+        room.getSubmittedMissionCards().clear();
         roomRepo.save(room);
 
-        if (room.getSubmittedMissionCards().size() == room.getCurrentExpedition().size()) {
-            int success = 0, fail = 0;
-            for (String r : room.getSubmittedMissionCards().values()) {
-                if ("SUCCESS".equals(r)) success++;
-                else if ("FAIL".equals(r)) fail++;
-            }
-
-            int round = room.getCurrentRound();
-            room.getMissionResults().put(round, new MissionRecord(success, fail));
-            room.getSubmittedMissionCards().clear();
-            roomRepo.save(room);
-
-            ws.convertAndSend("/topic/room/" + roomId, "allMissionCardsSubmitted");
-        }
+        ws.convertAndSend("/topic/room/" + roomId, "allMissionCardsSubmitted");
     }
+}
+
 
     public List<String> generateSkillOrder(Room room) {
     // 技能觸發順序固定

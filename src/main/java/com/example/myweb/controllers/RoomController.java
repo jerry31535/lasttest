@@ -487,31 +487,33 @@ public class RoomController {
         int currentRound = room.getCurrentRound();
         String roundKey = String.valueOf(currentRound);
 
-        // 安全檢查：沒有任務結果就拒絕
-        if (!room.getMissionResults().containsKey(currentRound)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body("尚未結算任務結果，不能結束技能階段");
+        MissionRecord record = room.getMissionResults().get(currentRound);
+        if (record == null || record.getCardMap() == null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("尚未結算任務結果");
         }
 
-        // 從 missionResults 中再取一次這輪統計
-        MissionRecord thisRound = room.getMissionResults().get(currentRound);
-        int success = thisRound.getSuccessCount();
-        int fail = thisRound.getFailCount();
+        // ✅ 重新統計 cardMap，確保是技能後狀態
+        int success = 0, fail = 0;
+        for (String card : record.getCardMap().values()) {
+            if ("SUCCESS".equals(card)) success++;
+            else if ("FAIL".equals(card)) fail++;
+        }
 
-        // 寫入累積數值
+        // ✅ 更新 MissionRecord 中的統計數
+        record.setSuccessCount(success);
+        record.setFailCount(fail);
+
+        // ✅ 累計寫回 Room
         room.setSuccessCount(room.getSuccessCount() + success);
         room.setFailCount(room.getFailCount() + fail);
 
-        // 清空技能階段與暫存資料
-        
+        // 清除暫存資料
         room.getSubmittedMissionCards().clear();
         room.getMissionSuccess().remove(roundKey);
         room.getMissionFail().remove(roundKey);
 
-        // 回合推進
+        // 回合 +1
         room.setCurrentRound(currentRound + 1);
-
-        // 儲存
         roomRepository.save(room);
 
         // 廣播技能結束
@@ -520,36 +522,40 @@ public class RoomController {
         return ResponseEntity.ok().build();
     }
 
+
     @PostMapping("/skill/lurker-toggle")
-    public ResponseEntity<?> useLurkerSkill(@RequestBody Map<String, String> body) {
-        String roomId = body.get("roomId");
-        String playerName = body.get("playerName");
-        String targetName = body.get("targetName");
+public ResponseEntity<?> useLurkerSkill(@RequestBody Map<String, String> body) {
+    String roomId = body.get("roomId");
+    String playerName = body.get("playerName");
+    String targetName = body.get("targetName");
 
-        Room room = roomRepository.findById(roomId).orElse(null);
-        if (room == null) return ResponseEntity.notFound().build();
+    Room room = roomRepository.findById(roomId).orElse(null);
+    if (room == null) return ResponseEntity.notFound().build();
 
-        // ✅ 確認潛伏者技能只用一次
-        if (room.getUsedSkillMap().getOrDefault(playerName, false)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("你已使用過潛伏者技能！");
-        }
-
-        // ✅ 確認對象有交卡
-        String original = room.getSubmittedMissionCards().get(targetName);
-        if (original == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("該玩家尚未提交任務卡");
-        }
-
-        // ✅ 反轉卡片屬性
-        String toggled = original.equals("SUCCESS") ? "FAIL" : "SUCCESS";
-        room.getSubmittedMissionCards().put(targetName, toggled);
-
-        // ✅ 記錄此技能已使用
-        room.getUsedSkillMap().put(playerName, true);
-        roomRepository.save(room);
-
-        return ResponseEntity.ok().build();
+    // ✅ 技能限用一次
+    if (room.getUsedSkillMap().getOrDefault(playerName, false)) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("你已使用過潛伏者技能！");
     }
+
+    // ✅ 改抓 missionResults 中該回合的卡片 map
+    int round = room.getCurrentRound();
+    MissionRecord record = room.getMissionResults().get(round);
+    if (record == null || record.getCardMap() == null || !record.getCardMap().containsKey(targetName)) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("該玩家尚未提交任務卡");
+    }
+
+    // ✅ 反轉卡片內容
+    String original = record.getCardMap().get(targetName);
+    String toggled = original.equals("SUCCESS") ? "FAIL" : "SUCCESS";
+    record.getCardMap().put(targetName, toggled);
+
+    // ✅ 標記技能已用
+    room.getUsedSkillMap().put(playerName, true);
+    roomRepository.save(room);
+
+    return ResponseEntity.ok().build();
+}
+
 
         
 

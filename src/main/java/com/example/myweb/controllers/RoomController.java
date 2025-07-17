@@ -520,6 +520,37 @@ public class RoomController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/skill/lurker-toggle")
+    public ResponseEntity<?> useLurkerSkill(@RequestBody Map<String, String> body) {
+        String roomId = body.get("roomId");
+        String playerName = body.get("playerName");
+        String targetName = body.get("targetName");
+
+        Room room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) return ResponseEntity.notFound().build();
+
+        // ✅ 確認潛伏者技能只用一次
+        if (room.getUsedSkillMap().getOrDefault(playerName, false)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("你已使用過潛伏者技能！");
+        }
+
+        // ✅ 確認對象有交卡
+        String original = room.getSubmittedMissionCards().get(targetName);
+        if (original == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("該玩家尚未提交任務卡");
+        }
+
+        // ✅ 反轉卡片屬性
+        String toggled = original.equals("SUCCESS") ? "FAIL" : "SUCCESS";
+        room.getSubmittedMissionCards().put(targetName, toggled);
+
+        // ✅ 記錄此技能已使用
+        room.getUsedSkillMap().put(playerName, true);
+        roomRepository.save(room);
+
+        return ResponseEntity.ok().build();
+    }
+
         
 
 

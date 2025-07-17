@@ -24,6 +24,7 @@ public class Room {
 
     /* 角色相關 */
     private Map<String, RoleInfo> assignedRoles = new HashMap<>();
+    private Map<String, Boolean> usedSkillMap = new HashMap<>();
 
     /* 狀態旗標 */
     private boolean started = false;
@@ -85,6 +86,15 @@ public class Room {
 
     public String getCurrentLeader() { return currentLeader; }
     public void   setCurrentLeader(String currentLeader) { this.currentLeader = currentLeader; }
+
+    public Map<String, Boolean> getUsedSkillMap() {
+        return usedSkillMap;
+    }
+
+    public void setUsedSkillMap(Map<String, Boolean> usedSkillMap) {
+        this.usedSkillMap = usedSkillMap;
+    }
+
 
     /* ---------- 🔥 投票欄位 Getter / Setter ---------- */
     public List<String> getCurrentExpedition() { return currentExpedition; }

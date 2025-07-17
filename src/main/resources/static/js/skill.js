@@ -113,11 +113,25 @@ async function showEngineerResult() {
 // ✅ 潛伏者：載入當回合所有出戰玩家（不能選自己）
 async function fetchLurkerTargets() {
   try {
-    const res = await fetch(`/api/room/${roomId}/mission-submissions`);
-    const data = await res.json(); // { playerName: "SUCCESS" | "FAIL" }
+    const res = await fetch(`/api/room/${roomId}`);
+    const room = await res.json();
+    const currentRound = room.currentRound;
+    const usedMap = room.usedSkillMap || {};
+
+    // 技能已使用就停用
+    if (usedMap[playerName]) {
+      lurkerStatus.textContent = "❗ 你已使用過技能，無法再次使用。";
+      lurkerBtn.disabled = true;
+      lurkerSelect.disabled = true;
+      return;
+    }
+
+    // 該輪任務記錄
+    const mission = room.missionResults?.[currentRound];
+    const cardMap = mission?.cardMap || {};  // 假設後端在 MissionRecord 中存的是 player → result
 
     lurkerSelect.innerHTML = `<option value="">-- 選擇要反轉的玩家 --</option>`;
-    Object.keys(data).forEach(player => {
+    Object.keys(cardMap).forEach(player => {
       if (player !== playerName) {
         const option = document.createElement("option");
         option.value = player;
@@ -126,9 +140,11 @@ async function fetchLurkerTargets() {
       }
     });
   } catch (err) {
-    console.error("❌ 潛伏者無法取得出戰任務列表", err);
+    console.error("❌ 潛伏者無法取得任務卡列表", err);
   }
 }
+
+
 
 // ✅ 潛伏者：點擊技能按鈕
 lurkerBtn.addEventListener("click", async () => {

@@ -241,7 +241,7 @@ public class RoomController {
                     new Room.RoleInfo("指揮官",     "goodpeople3.png"),
                     new Room.RoleInfo("工程師",     "goodpeople1.png"),
                     new Room.RoleInfo("普通倖存者","goodpeople4.png"),
-                    new Room.RoleInfo("普通倖存者","goodpeople4.png"),
+                    new Room.RoleInfo("破壞者","badpeople2.png"),
                     new Room.RoleInfo("潛伏者",     "badpeople1.png"),
                     new Room.RoleInfo("邪惡平民",   "badpeople4.png")
                 );
@@ -613,6 +613,34 @@ public class RoomController {
         ));
     }
 
+    @PostMapping("/skill/saboteur-nullify")
+    public ResponseEntity<?> useSaboteurSkill(@RequestBody Map<String, String> body) {
+        String roomId = body.get("roomId");
+        String playerName = body.get("playerName");
+        String targetName = body.get("targetName");
+
+        Room room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) return ResponseEntity.notFound().build();
+
+        int round = room.getCurrentRound();
+        MissionRecord record = room.getMissionResults().get(round);
+        if (record == null || record.getCardMap() == null || !record.getCardMap().containsKey(targetName))
+            return ResponseEntity.status(400).body("該玩家尚未提交卡片");
+
+        String roundKey = playerName + "_R" + round;
+        if (room.getSaboteurUsedThisRound().contains(roundKey))
+            return ResponseEntity.status(403).body("本回合你已使用過技能");
+
+        int used = room.getSaboteurSkillCount().getOrDefault(playerName, 0);
+        if (used >= 2) return ResponseEntity.status(403).body("技能已使用 2 次");
+
+        String removed = record.getCardMap().remove(targetName);
+        room.getSaboteurSkillCount().put(playerName, used + 1);
+        room.getSaboteurUsedThisRound().add(roundKey);
+        roomRepository.save(room);
+
+        return ResponseEntity.ok(Map.of("removed", removed, "remaining", 1 - used));
+    }
 
 
 

@@ -22,6 +22,11 @@ const commanderSelect = document.getElementById("commander-target-select");
 const commanderBtn = document.getElementById("use-commander-skill-btn");
 const commanderResult = document.getElementById("commander-skill-result");
 
+const saboteurPanel = document.getElementById("saboteur-panel");
+const saboteurSelect = document.getElementById("saboteur-target-select");
+const saboteurBtn = document.getElementById("use-saboteur-skill-btn");
+const saboteurStatus = document.getElementById("saboteur-status-msg");
+
 let myRole = null;
 
 // ✅ 初始化
@@ -34,6 +39,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (myRole === "潛伏者") await fetchLurkerTargets();
   if (myRole === "指揮官") await fetchCommanderTargets();
+  if (myRole === "破壞者") await fetchSaboteurTargets();
 
   connectSkillPhase();
   startCountdown(20);
@@ -79,6 +85,7 @@ function connectSkillPhase() {
           if (myRole === "工程師") showEngineerResult();
           if (myRole === "潛伏者") lurkerPanel.classList.remove("hidden");
           if (myRole === "指揮官") commanderPanel.classList.remove("hidden");
+          if (myRole === "破壞者") saboteurPanel.classList.remove("hidden");
         } else {
           skillMsg.textContent = "你不是技能角色，請等待技能階段結束...";
           waitingPanel.classList.remove("hidden");
@@ -88,7 +95,7 @@ function connectSkillPhase() {
   });
 }
 
-// ✅ 工程師：顯示任務卡成功/失敗數量
+// ✅ 工程師
 async function showEngineerResult() {
   try {
     const res = await fetch(`/api/room/${roomId}`);
@@ -110,7 +117,7 @@ async function showEngineerResult() {
   }
 }
 
-// ✅ 潛伏者：載入可選目標
+// ✅ 潛伏者
 async function fetchLurkerTargets() {
   try {
     const res = await fetch(`/api/room/${roomId}`);
@@ -143,7 +150,6 @@ async function fetchLurkerTargets() {
   }
 }
 
-// ✅ 潛伏者：使用技能
 lurkerBtn.addEventListener("click", async () => {
   const selected = lurkerSelect.value;
   lurkerStatus.textContent = "";
@@ -172,7 +178,7 @@ lurkerBtn.addEventListener("click", async () => {
   }
 });
 
-// ✅ 指揮官：載入選項
+// ✅ 指揮官
 async function fetchCommanderTargets() {
   try {
     const res = await fetch(`/api/room/${roomId}`);
@@ -193,7 +199,6 @@ async function fetchCommanderTargets() {
   }
 }
 
-// ✅ 指揮官：查詢陣營
 commanderBtn.addEventListener("click", async () => {
   const selected = commanderSelect.value;
   commanderResult.textContent = "";
@@ -221,6 +226,64 @@ commanderBtn.addEventListener("click", async () => {
     }
   } catch (err) {
     commanderResult.textContent = "❌ 發送請求失敗：" + err;
+  }
+});
+
+// ✅ 破壞者
+async function fetchSaboteurTargets() {
+  try {
+    const res = await fetch(`/api/room/${roomId}`);
+    const room = await res.json();
+    const cardMap = room.missionResults?.[room.currentRound]?.cardMap || {};
+    const usedMap = room.usedSkillMap || {};
+
+    if (usedMap[playerName]) {
+      saboteurStatus.textContent = "❗ 你已使用過技能，無法再次使用。";
+      saboteurBtn.disabled = true;
+      saboteurSelect.disabled = true;
+      return;
+    }
+
+    saboteurSelect.innerHTML = `<option value="">-- 選擇要破壞的玩家 --</option>`;
+    Object.keys(cardMap).forEach(name => {
+      if (name !== playerName) {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = `${name}（${cardMap[name]}）`;
+        saboteurSelect.appendChild(option);
+      }
+    });
+  } catch (err) {
+    saboteurStatus.textContent = "❌ 無法取得可破壞對象";
+  }
+}
+
+saboteurBtn.addEventListener("click", async () => {
+  const selected = saboteurSelect.value;
+  saboteurStatus.textContent = "";
+
+  if (!selected) {
+    saboteurStatus.textContent = "請選擇要破壞的對象。";
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/skill/saboteur-nullify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ roomId, playerName, targetName: selected })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      saboteurStatus.textContent = `🧨 已使 ${selected} 的卡片 (${data.removed}) 失效！剩餘次數 ${data.remaining}`;
+      saboteurBtn.disabled = true;
+    } else {
+      const errMsg = await res.text();
+      saboteurStatus.textContent = "❌ 破壞失敗：" + errMsg;
+    }
+  } catch (err) {
+    saboteurStatus.textContent = "❌ 發送請求失敗：" + err;
   }
 });
 

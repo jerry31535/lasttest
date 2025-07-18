@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -524,40 +525,95 @@ public class RoomController {
 
 
     @PostMapping("/skill/lurker-toggle")
-public ResponseEntity<?> useLurkerSkill(@RequestBody Map<String, String> body) {
-    String roomId = body.get("roomId");
-    String playerName = body.get("playerName");
-    String targetName = body.get("targetName");
+    public ResponseEntity<?> useLurkerSkill(@RequestBody Map<String, String> body) {
+        String roomId = body.get("roomId");
+        String playerName = body.get("playerName");
+        String targetName = body.get("targetName");
 
-    Room room = roomRepository.findById(roomId).orElse(null);
-    if (room == null) return ResponseEntity.notFound().build();
+        Room room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) return ResponseEntity.notFound().build();
 
-    // ✅ 技能限用一次
-    if (room.getUsedSkillMap().getOrDefault(playerName, false)) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("你已使用過潛伏者技能！");
+        // ✅ 技能限用一次
+        if (room.getUsedSkillMap().getOrDefault(playerName, false)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("你已使用過潛伏者技能！");
+        }
+
+        // ✅ 改抓 missionResults 中該回合的卡片 map
+        int round = room.getCurrentRound();
+        MissionRecord record = room.getMissionResults().get(round);
+        if (record == null || record.getCardMap() == null || !record.getCardMap().containsKey(targetName)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("該玩家尚未提交任務卡");
+        }
+
+        // ✅ 反轉卡片內容
+        String original = record.getCardMap().get(targetName);
+        String toggled = original.equals("SUCCESS") ? "FAIL" : "SUCCESS";
+        record.getCardMap().put(targetName, toggled);
+
+        // ✅ 標記技能已用
+        room.getUsedSkillMap().put(playerName, true);
+        roomRepository.save(room);
+
+        return ResponseEntity.ok().build();
     }
 
-    // ✅ 改抓 missionResults 中該回合的卡片 map
-    int round = room.getCurrentRound();
-    MissionRecord record = room.getMissionResults().get(round);
-    if (record == null || record.getCardMap() == null || !record.getCardMap().containsKey(targetName)) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("該玩家尚未提交任務卡");
+
+    @PostMapping("/skill/commander-check")
+    public ResponseEntity<?> useCommanderSkill(@RequestBody Map<String, String> body) {
+        String roomId = body.get("roomId");
+        String playerName = body.get("playerName");     // 指揮官本人
+        String targetName = body.get("targetName");     // 要查看的對象
+
+        Room room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) return ResponseEntity.notFound().build();
+
+        // ✅ 不能查看自己
+        if (playerName.equals(targetName)) {
+            return ResponseEntity.badRequest().body("不能查看自己");
+        }
+
+        int currentRound = room.getCurrentRound();
+
+        // ✅ 使用次數限制
+        Map<String, Integer> skillCount = room.getCommanderSkillCount();
+        int used = skillCount.getOrDefault(playerName, 0);
+        if (used >= 2) {
+            return ResponseEntity.status(403).body("你已使用過 2 次技能");
+        }
+
+        // ✅ 每回合只可用一次
+        String usageKey = playerName + "_R" + currentRound;
+        Set<String> usedThisRound = room.getCommanderUsedThisRound();
+        if (usedThisRound.contains(usageKey)) {
+            return ResponseEntity.status(403).body("本回合你已查詢過玩家");
+        }
+
+        // ✅ 查詢目標角色陣營
+        Room.RoleInfo roleInfo = room.getAssignedRoles().get(targetName);
+        if (roleInfo == null) return ResponseEntity.badRequest().body("找不到該玩家角色");
+
+        String roleName = roleInfo.getName();
+        String faction = switch (roleName) {
+            case "工程師", "醫護兵", "指揮官", "普通倖存者" -> "正義";
+            case "潛伏者", "破壞者", "影武者", "邪惡平民" -> "邪惡";
+            default -> "未知";
+        };
+
+        // ✅ 記錄技能使用
+        skillCount.put(playerName, used + 1);
+        usedThisRound.add(usageKey);
+
+        room.setCommanderSkillCount(skillCount);
+        room.setCommanderUsedThisRound(usedThisRound);
+        roomRepository.save(room);
+
+        return ResponseEntity.ok(Map.of(
+            "faction", faction,
+            "remaining", 2 - (used + 1)
+        ));
     }
 
-    // ✅ 反轉卡片內容
-    String original = record.getCardMap().get(targetName);
-    String toggled = original.equals("SUCCESS") ? "FAIL" : "SUCCESS";
-    record.getCardMap().put(targetName, toggled);
 
-    // ✅ 標記技能已用
-    room.getUsedSkillMap().put(playerName, true);
-    roomRepository.save(room);
-
-    return ResponseEntity.ok().build();
-}
-
-
-        
 
 
 

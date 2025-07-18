@@ -1,3 +1,4 @@
+// /js/skill.js
 const urlParams = new URLSearchParams(window.location.search);
 const roomId = urlParams.get("roomId");
 const playerName = sessionStorage.getItem("playerName");
@@ -16,6 +17,11 @@ const lurkerSelect = document.getElementById("lurker-target-select");
 const lurkerBtn = document.getElementById("use-lurker-skill-btn");
 const lurkerStatus = document.getElementById("lurker-status-msg");
 
+const commanderPanel = document.getElementById("commander-panel");
+const commanderSelect = document.getElementById("commander-target-select");
+const commanderBtn = document.getElementById("use-commander-skill-btn");
+const commanderResult = document.getElementById("commander-skill-result");
+
 let myRole = null;
 
 // ✅ 初始化
@@ -26,9 +32,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  if (myRole === "潛伏者") {
-    await fetchLurkerTargets(); // 初始化選項
-  }
+  if (myRole === "潛伏者") await fetchLurkerTargets();
+  if (myRole === "指揮官") await fetchCommanderTargets();
 
   connectSkillPhase();
   startCountdown(20);
@@ -59,7 +64,6 @@ function connectSkillPhase() {
       }
     });
 
-    // 取得目前輪到的技能角色列表
     fetch(`/api/room/${roomId}/skill-state`)
       .then(res => res.json())
       .then(data => {
@@ -72,13 +76,9 @@ function connectSkillPhase() {
           waitingPanel.classList.add("hidden");
           skillPanel.classList.remove("hidden");
 
-          if (myRole === "工程師") {
-            showEngineerResult();
-          }
-
-          if (myRole === "潛伏者") {
-            lurkerPanel.classList.remove("hidden");
-          }
+          if (myRole === "工程師") showEngineerResult();
+          if (myRole === "潛伏者") lurkerPanel.classList.remove("hidden");
+          if (myRole === "指揮官") commanderPanel.classList.remove("hidden");
         } else {
           skillMsg.textContent = "你不是技能角色，請等待技能階段結束...";
           waitingPanel.classList.remove("hidden");
@@ -110,15 +110,14 @@ async function showEngineerResult() {
   }
 }
 
-// ✅ 潛伏者：載入當回合所有出戰玩家（不能選自己）
+// ✅ 潛伏者：載入可選目標
 async function fetchLurkerTargets() {
   try {
     const res = await fetch(`/api/room/${roomId}`);
     const room = await res.json();
-    const currentRound = room.currentRound;
+    const submissions = room.missionResults?.[room.currentRound]?.cardMap || {};
     const usedMap = room.usedSkillMap || {};
 
-    // 技能已使用就停用
     if (usedMap[playerName]) {
       lurkerStatus.textContent = "❗ 你已使用過技能，無法再次使用。";
       lurkerBtn.disabled = true;
@@ -126,16 +125,12 @@ async function fetchLurkerTargets() {
       return;
     }
 
-    // 該輪任務記錄
-    const mission = room.missionResults?.[currentRound];
-    const cardMap = mission?.cardMap || {};
-
     lurkerSelect.innerHTML = `<option value="">-- 選擇要反轉的玩家 --</option>`;
-    Object.entries(cardMap).forEach(([player, result]) => {
+    Object.keys(submissions).forEach(player => {
       if (player !== playerName) {
         const option = document.createElement("option");
         option.value = player;
-        option.textContent = `${player}：${result === "SUCCESS" ? "✅ 成功" : "❌ 失敗"}`;
+        option.textContent = `${player}（已提交）`;
         lurkerSelect.appendChild(option);
       }
     });
@@ -143,16 +138,12 @@ async function fetchLurkerTargets() {
     if (lurkerSelect.options.length === 1) {
       lurkerStatus.textContent = "⚠️ 尚無可選擇的對象（可能還未交卡）";
     }
-
   } catch (err) {
     console.error("❌ 潛伏者無法取得任務卡列表", err);
   }
 }
 
-
-
-
-// ✅ 潛伏者：點擊技能按鈕
+// ✅ 潛伏者：使用技能
 lurkerBtn.addEventListener("click", async () => {
   const selected = lurkerSelect.value;
   lurkerStatus.textContent = "";
@@ -166,11 +157,7 @@ lurkerBtn.addEventListener("click", async () => {
     const res = await fetch(`/api/skill/lurker-toggle`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        roomId,
-        playerName,
-        targetName: selected
-      })
+      body: JSON.stringify({ roomId, playerName, targetName: selected })
     });
 
     if (res.ok) {
@@ -182,6 +169,58 @@ lurkerBtn.addEventListener("click", async () => {
     }
   } catch (err) {
     lurkerStatus.textContent = "❌ 發送請求錯誤：" + err;
+  }
+});
+
+// ✅ 指揮官：載入選項
+async function fetchCommanderTargets() {
+  try {
+    const res = await fetch(`/api/room/${roomId}`);
+    const room = await res.json();
+    const players = room.players || [];
+
+    commanderSelect.innerHTML = `<option value="">-- 請選擇要查看的玩家 --</option>`;
+    players.forEach(p => {
+      if (p !== playerName) {
+        const option = document.createElement("option");
+        option.value = p;
+        option.textContent = p;
+        commanderSelect.appendChild(option);
+      }
+    });
+  } catch (err) {
+    console.error("❌ 無法取得玩家列表", err);
+  }
+}
+
+// ✅ 指揮官：查詢陣營
+commanderBtn.addEventListener("click", async () => {
+  const selected = commanderSelect.value;
+  commanderResult.textContent = "";
+
+  if (!selected) {
+    commanderResult.textContent = "請先選擇玩家";
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/skill/commander-check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ roomId, playerName, targetName: selected })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      commanderResult.textContent = `🔍 ${selected} 的陣營是：${data.faction}（剩餘次數：${data.remaining}）`;
+      commanderBtn.disabled = true;
+      commanderSelect.disabled = true;
+    } else {
+      const errMsg = await res.text();
+      commanderResult.textContent = `❌ 錯誤：${errMsg}`;
+    }
+  } catch (err) {
+    commanderResult.textContent = "❌ 發送請求失敗：" + err;
   }
 });
 

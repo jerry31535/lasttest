@@ -25,7 +25,8 @@ public class Room {
     /* 角色相關 */
     private Map<String, RoleInfo> assignedRoles = new HashMap<>();
     private Map<String, Boolean> usedSkillMap = new HashMap<>();
-
+    private Map<String, Integer> commanderSkillCount = new HashMap<>();
+    private Set<String> commanderUsedThisRound = new HashSet<>();
     /* 狀態旗標 */
     private boolean started = false;
 
@@ -93,6 +94,22 @@ public class Room {
 
     public void setUsedSkillMap(Map<String, Boolean> usedSkillMap) {
         this.usedSkillMap = usedSkillMap;
+    }
+
+    public Map<String, Integer> getCommanderSkillCount() {
+        return commanderSkillCount;
+    }
+
+    public void setCommanderSkillCount(Map<String, Integer> commanderSkillCount) {
+        this.commanderSkillCount = commanderSkillCount;
+    }
+
+    public Set<String> getCommanderUsedThisRound() {
+        return commanderUsedThisRound;
+    }
+
+    public void setCommanderUsedThisRound(Set<String> commanderUsedThisRound) {
+        this.commanderUsedThisRound = commanderUsedThisRound;
     }
 
 

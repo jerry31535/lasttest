@@ -500,6 +500,24 @@ public class RoomController {
             else if ("FAIL".equals(card)) fail++;
         }
 
+        // ✅ 醫護兵保護判定：本回合是否有人被保護
+        String protectedPlayer = room.getMedicProtectionMap().getOrDefault(currentRound, null);
+        if (protectedPlayer != null && record.getCardMap().containsKey(protectedPlayer)) {
+            Room.RoleInfo roleInfo = room.getAssignedRoles().get(protectedPlayer);
+            String roleName = roleInfo != null ? roleInfo.getName() : "";
+
+            boolean isGood = switch (roleName) {
+                case "指揮官", "工程師", "醫護兵", "普通倖存者" -> true;
+                default -> false;
+            };
+
+            if (isGood) {
+                success++;  // ✅ 好人被保護 → 成功數 +1
+            } else {
+                success--;  // ✅ 壞人被保護 → 成功數 -1（等同讓壞人破壞失敗）
+            }
+        }
+
         // ✅ 更新 MissionRecord 中的統計數
         record.setSuccessCount(success);
         record.setFailCount(fail);
@@ -524,7 +542,7 @@ public class RoomController {
     }
 
 
-    @PostMapping("/skill/lurker-toggle")
+   @PostMapping("/skill/lurker-toggle")
     public ResponseEntity<?> useLurkerSkill(@RequestBody Map<String, String> body) {
         String roomId = body.get("roomId");
         String playerName = body.get("playerName");
@@ -538,11 +556,19 @@ public class RoomController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("你已使用過潛伏者技能！");
         }
 
-        // ✅ 改抓 missionResults 中該回合的卡片 map
         int round = room.getCurrentRound();
         MissionRecord record = room.getMissionResults().get(round);
         if (record == null || record.getCardMap() == null || !record.getCardMap().containsKey(targetName)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("該玩家尚未提交任務卡");
+        }
+
+        // ✅ 判斷是否受到醫護兵保護
+        String protectedPlayer = room.getMedicProtectionMap() != null
+            ? room.getMedicProtectionMap().getOrDefault(round, null)
+            : null;
+
+        if (protectedPlayer != null && protectedPlayer.equals(targetName)) {
+            return ResponseEntity.status(403).body("該玩家已受到醫護兵保護，潛伏者無法反轉此卡。");
         }
 
         // ✅ 反轉卡片內容
@@ -556,7 +582,6 @@ public class RoomController {
 
         return ResponseEntity.ok().build();
     }
-
 
     @PostMapping("/skill/commander-check")
     public ResponseEntity<?> useCommanderSkill(@RequestBody Map<String, String> body) {
@@ -613,7 +638,7 @@ public class RoomController {
         ));
     }
 
-    @PostMapping("/skill/saboteur-nullify")
+   @PostMapping("/skill/saboteur-nullify")
     public ResponseEntity<?> useSaboteurSkill(@RequestBody Map<String, String> body) {
         String roomId = body.get("roomId");
         String playerName = body.get("playerName");
@@ -634,6 +659,16 @@ public class RoomController {
         int used = room.getSaboteurSkillCount().getOrDefault(playerName, 0);
         if (used >= 2) return ResponseEntity.status(403).body("技能已使用 2 次");
 
+        // ✅ 檢查是否被醫護兵保護
+        String protectedPlayer = room.getMedicProtectionMap() != null
+            ? room.getMedicProtectionMap().getOrDefault(round, null)
+            : null;
+
+        if (protectedPlayer != null && protectedPlayer.equals(targetName)) {
+            return ResponseEntity.status(403).body("該玩家已受到醫護兵保護，破壞者無法破壞此卡。");
+        }
+
+        // ✅ 執行移除卡片
         String removed = record.getCardMap().remove(targetName);
         room.getSaboteurSkillCount().put(playerName, used + 1);
         room.getSaboteurUsedThisRound().add(roundKey);
@@ -642,6 +677,28 @@ public class RoomController {
         return ResponseEntity.ok(Map.of("removed", removed, "remaining", 1 - used));
     }
 
+
+    @PostMapping("/skill/medic-protect")
+    public ResponseEntity<?> useMedicSkill(@RequestBody Map<String, String> body) {
+        String roomId = body.get("roomId");
+        String playerName = body.get("playerName");   // 醫護兵自己
+        String targetName = body.get("targetName");   // 要保護的對象
+
+        Room room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) return ResponseEntity.notFound().build();
+
+        if (room.getMedicSkillUsed().getOrDefault(playerName, false)) {
+            return ResponseEntity.status(403).body("你已使用過技能");
+        }
+
+        int round = room.getCurrentRound();
+
+        room.getMedicProtectionMap().put(round + 1, targetName); // 下一回合才生效
+        room.getMedicSkillUsed().put(playerName, true);
+
+        roomRepository.save(room);
+        return ResponseEntity.ok(Map.of("protected", targetName));
+    }
 
 
 

@@ -29,6 +29,9 @@ public class Room {
     private Set<String> commanderUsedThisRound = new HashSet<>();
     private Map<String, Integer> saboteurSkillCount = new HashMap<>();
     private Set<String> saboteurUsedThisRound = new HashSet<>();
+    private Map<String, Boolean> medicSkillUsed = new HashMap<>();
+    private Map<Integer, String> medicProtectionMap = new HashMap<>(); 
+
 
     /* 狀態旗標 */
     private boolean started = false;
@@ -129,6 +132,19 @@ public class Room {
         this.saboteurUsedThisRound = saboteurUsedThisRound;
     }
 
+    public Map<String, Boolean> getMedicSkillUsed() {
+        return medicSkillUsed;
+    }
+    public void setMedicSkillUsed(Map<String, Boolean> medicSkillUsed) {
+        this.medicSkillUsed = medicSkillUsed;
+    }
+
+    public Map<Integer, String> getMedicProtectionMap() {
+        return medicProtectionMap;
+    }
+    public void setMedicProtectionMap(Map<Integer, String> medicProtectionMap) {
+        this.medicProtectionMap = medicProtectionMap;
+    }
 
 
     /* ---------- 🔥 投票欄位 Getter / Setter ---------- */

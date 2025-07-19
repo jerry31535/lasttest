@@ -27,6 +27,10 @@ const saboteurSelect = document.getElementById("saboteur-target-select");
 const saboteurBtn = document.getElementById("use-saboteur-skill-btn");
 const saboteurStatus = document.getElementById("saboteur-status-msg");
 
+const medicPanel = document.getElementById("medic-panel");
+const medicSelect = document.getElementById("medic-select");
+const medicBtn = document.getElementById("use-medic-skill-btn");
+const medicStatus = document.getElementById("medic-status-msg");
 let myRole = null;
 
 // ✅ 初始化
@@ -40,6 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (myRole === "潛伏者") await fetchLurkerTargets();
   if (myRole === "指揮官") await fetchCommanderTargets();
   if (myRole === "破壞者") await fetchSaboteurTargets();
+  if (myRole === "醫護兵") await fetchMedicTargets();
 
   connectSkillPhase();
   startCountdown(20);
@@ -86,6 +91,7 @@ function connectSkillPhase() {
           if (myRole === "潛伏者") lurkerPanel.classList.remove("hidden");
           if (myRole === "指揮官") commanderPanel.classList.remove("hidden");
           if (myRole === "破壞者") saboteurPanel.classList.remove("hidden");
+          if (myRole === "醫護兵") medicPanel.classList.remove("hidden");
         } else {
           skillMsg.textContent = "你不是技能角色，請等待技能階段結束...";
           waitingPanel.classList.remove("hidden");
@@ -286,6 +292,66 @@ saboteurBtn.addEventListener("click", async () => {
     saboteurStatus.textContent = "❌ 發送請求失敗：" + err;
   }
 });
+
+  // ✅ 醫護兵：載入目標
+  async function fetchMedicTargets() {
+    try {
+      const res = await fetch(`/api/room/${roomId}`);
+      const room = await res.json();
+      const players = room.players || [];
+      const usedMap = room.medicSkillUsed || {};
+
+      if (usedMap[playerName]) {
+        medicStatus.textContent = "❗ 你已使用過技能，無法再次使用。";
+        medicBtn.disabled = true;
+        medicSelect.disabled = true;
+        return;
+      }
+
+      medicSelect.innerHTML = `<option value="">-- 選擇要保護的玩家 --</option>`;
+      players.forEach(p => {
+        if (p !== playerName) {
+          const option = document.createElement("option");
+          option.value = p;
+          option.textContent = p;
+          medicSelect.appendChild(option);
+        }
+      });
+    } catch (err) {
+      console.error("❌ 醫護兵無法取得玩家列表", err);
+    }
+  }
+
+  medicBtn.addEventListener("click", async () => {
+    const selected = medicSelect.value;
+    medicStatus.textContent = "";
+
+    if (!selected) {
+      medicStatus.textContent = "請選擇要保護的玩家。";
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/skill/medic-protect`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomId, playerName, targetName: selected })
+      });
+
+      if (res.ok) {
+        medicStatus.textContent = `🛡️ 已成功保護 ${selected}（整場限一次）`;
+        medicBtn.disabled = true;
+        medicSelect.disabled = true;
+      } else {
+        const errMsg = await res.text();
+        medicStatus.textContent = "❌ 發動失敗：" + errMsg;
+      }
+    } catch (err) {
+      medicStatus.textContent = "❌ 發送請求錯誤：" + err;
+    }
+  });
+
+
 
 // ✅ 倒數計時器
 async function startCountdown(seconds) {

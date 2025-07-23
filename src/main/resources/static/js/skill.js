@@ -31,6 +31,12 @@ const medicPanel = document.getElementById("medic-panel");
 const medicSelect = document.getElementById("medic-select");
 const medicBtn = document.getElementById("use-medic-skill-btn");
 const medicStatus = document.getElementById("medic-status-msg");
+
+const shadowPanel = document.getElementById("shadow-panel");
+const shadowSelect = document.getElementById("shadow-select");
+const shadowBtn = document.getElementById("use-shadow-skill-btn");
+const shadowStatus = document.getElementById("shadow-status-msg");
+
 let myRole = null;
 
 // ✅ 初始化
@@ -45,6 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (myRole === "指揮官") await fetchCommanderTargets();
   if (myRole === "破壞者") await fetchSaboteurTargets();
   if (myRole === "醫護兵") await fetchMedicTargets();
+  if (myRole === "影武者") await fetchShadowTargets();
 
   connectSkillPhase();
   startCountdown(20);
@@ -92,6 +99,7 @@ function connectSkillPhase() {
           if (myRole === "指揮官") commanderPanel.classList.remove("hidden");
           if (myRole === "破壞者") saboteurPanel.classList.remove("hidden");
           if (myRole === "醫護兵") medicPanel.classList.remove("hidden");
+          if (myRole === "影武者") shadowPanel.classList.remove("hidden");
         } else {
           skillMsg.textContent = "你不是技能角色，請等待技能階段結束...";
           waitingPanel.classList.remove("hidden");
@@ -348,6 +356,69 @@ saboteurBtn.addEventListener("click", async () => {
       }
     } catch (err) {
       medicStatus.textContent = "❌ 發送請求錯誤：" + err;
+    }
+  });
+
+  // ✅ 影武者
+  async function fetchShadowTargets() {
+    try {
+      const res = await fetch(`/api/room/${roomId}`);
+      const room = await res.json();
+      const players = room.players || [];
+      const used = room.shadowSkillCount?.[playerName] || 0;
+      const usedThisRound = room.shadowUsedThisRound?.includes(playerName);
+
+      if (used >= 2) {
+        shadowStatus.textContent = "❗ 你已用完兩次技能";
+        shadowSelect.disabled = true;
+        shadowBtn.disabled = true;
+        return;
+      }
+      if (usedThisRound) {
+        shadowStatus.textContent = "❗ 本回合已使用過技能";
+        shadowSelect.disabled = true;
+        shadowBtn.disabled = true;
+        return;
+      }
+
+      shadowSelect.innerHTML = `<option value="">-- 選擇要封鎖的玩家 --</option>`;
+      players.forEach(p => {
+        if (p !== playerName) {
+          const option = document.createElement("option");
+          option.value = p;
+          option.textContent = p;
+          shadowSelect.appendChild(option);
+        }
+      });
+    } catch (err) {
+      console.error("❌ 影武者無法取得資料", err);
+    }
+  }
+
+  shadowBtn.addEventListener("click", async () => {
+    const target = shadowSelect.value;
+    if (!target) {
+      shadowStatus.textContent = "請選擇要封鎖的玩家";
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/skill/shadow-disable", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomId, playerName, targetName: target })
+      });
+
+      if (res.ok) {
+        shadowStatus.textContent = `❌ ${target} 下一回合無法發動技能`;
+        shadowBtn.disabled = true;
+        shadowSelect.disabled = true;
+      } else {
+        const msg = await res.text();
+        shadowStatus.textContent = "❌ 發動失敗：" + msg;
+      }
+    } catch (err) {
+      console.error("❌ 發送錯誤", err);
     }
   });
 

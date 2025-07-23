@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -52,6 +53,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.myweb.dto.AvatarSelectionRequest;
 import com.example.myweb.models.MissionRecord;
 import com.example.myweb.models.Room;
+import com.example.myweb.models.Room.RoleInfo;
 import com.example.myweb.repositories.RoomRepository;
 import com.example.myweb.service.RoomService;
 
@@ -463,21 +465,35 @@ public class RoomController {
     }
     
     @GetMapping("/room/{roomId}/skill-state")
-    public ResponseEntity<Map<String, Object>> getSkillState(@PathVariable String roomId) {
-        Optional<Room> roomOpt = roomRepository.findById(roomId);
-        if (roomOpt.isEmpty()) return ResponseEntity.notFound().build();
+    public ResponseEntity<?> getSkillState(@PathVariable String roomId) {
+        Room room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) return ResponseEntity.notFound().build();
 
-        Room room = roomOpt.get();
-        Map<String, Object> result = new HashMap<>();
+        int round = room.getCurrentRound();
+        Set<String> blocked = room.getShadowDisabledMap().getOrDefault(round, new HashSet<>());
+        Map<String, RoleInfo> roles = room.getAssignedRoles();
 
-        
+        List<String> remainingRoles = new ArrayList<>();
+        for (String player : roles.keySet()) {
+            String role = roles.get(player).getName();
 
-        // ✅ 新增：取出目前技能角色順序（預存在 MongoDB 中，例如在 room.skillOrder）
-        List<String> allSkillRoles = room.getSkillOrder();  // 你應該有這個欄位
-        result.put("remainingRoles", allSkillRoles);
+            if (isSkillRole(role)) {
+                // ✅ 被封鎖者不加入本回合技能列表
+                if (!blocked.contains(player)) {
+                    remainingRoles.add(role);
+                }
+            }
+        }
 
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(Map.of("remainingRoles", remainingRoles));
     }
+
+    // 角色是否為技能角色
+    private boolean isSkillRole(String role) {
+        return Set.of("潛伏者", "影武者", "破壞者", "工程師", "指揮官", "醫護兵").contains(role);
+    }
+
+
 
     @PostMapping("/room/{roomId}/skill-finish")
     public ResponseEntity<?> finishSkillPhase(@PathVariable String roomId) {
@@ -698,6 +714,42 @@ public class RoomController {
 
         roomRepository.save(room);
         return ResponseEntity.ok(Map.of("protected", targetName));
+    }
+
+    @PostMapping("/skill/shadow-disable")
+    public ResponseEntity<?> useShadowSkill(@RequestBody Map<String, String> body) {
+        String roomId = body.get("roomId");
+        String playerName = body.get("playerName"); // 影武者本人
+        String targetName = body.get("targetName"); // 被封鎖對象
+
+        Room room = roomRepository.findById(roomId).orElse(null);
+        if (room == null) return ResponseEntity.notFound().build();
+
+        int round = room.getCurrentRound();
+
+        // ✅ 限回合一次
+        if (room.getShadowUsedThisRound().contains(playerName)) {
+            return ResponseEntity.status(403).body("本回合你已使用過影武者技能");
+        }
+
+        // ✅ 整場限用兩次
+        int used = room.getShadowSkillCount().getOrDefault(playerName, 0);
+        if (used >= 2) {
+            return ResponseEntity.status(403).body("影武者技能已使用 2 次");
+        }
+
+        // ✅ 記錄目標的「下一回合」技能將被封鎖
+        int nextRound = round + 1;
+        room.getShadowDisabledMap().putIfAbsent(nextRound, new HashSet<>());
+        room.getShadowDisabledMap().get(nextRound).add(targetName);
+
+        // ✅ 更新次數與使用紀錄
+        room.getShadowSkillCount().put(playerName, used + 1);
+        room.getShadowUsedThisRound().add(playerName);
+
+        roomRepository.save(room);
+
+        return ResponseEntity.ok(Map.of("disabledTarget", targetName, "remaining", 2 - used));
     }
 
 

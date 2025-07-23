@@ -31,7 +31,9 @@ public class Room {
     private Set<String> saboteurUsedThisRound = new HashSet<>();
     private Map<String, Boolean> medicSkillUsed = new HashMap<>();
     private Map<Integer, String> medicProtectionMap = new HashMap<>(); 
-
+    private Map<String, Integer> shadowSkillCount = new HashMap<>();
+    private Set<String> shadowUsedThisRound = new HashSet<>();
+    private Map<Integer, Set<String>> shadowDisabledMap = new HashMap<>();
 
     /* 狀態旗標 */
     private boolean started = false;
@@ -85,7 +87,10 @@ public class Room {
     public Map<String,String> getAvatarMap() { return avatarMap; }
     public void               setAvatarMap(Map<String,String> avatarMap) { this.avatarMap = avatarMap; }
 
-    public Map<String,RoleInfo> getAssignedRoles() { return assignedRoles; }
+    public Map<String, RoleInfo> getAssignedRoles() {
+        return assignedRoles;
+    }
+
     public void                 setAssignedRoles(Map<String,RoleInfo> assignedRoles) { this.assignedRoles = assignedRoles; }
 
     public boolean isStarted() { return started; }
@@ -94,6 +99,8 @@ public class Room {
     public String getCurrentLeader() { return currentLeader; }
     public void   setCurrentLeader(String currentLeader) { this.currentLeader = currentLeader; }
 
+    
+    
     public Map<String, Boolean> getUsedSkillMap() {
         return usedSkillMap;
     }
@@ -146,6 +153,26 @@ public class Room {
         this.medicProtectionMap = medicProtectionMap;
     }
 
+    public Map<String, Integer> getShadowSkillCount() {
+        return shadowSkillCount;
+    }
+    public void setShadowSkillCount(Map<String, Integer> shadowSkillCount) {
+        this.shadowSkillCount = shadowSkillCount;
+    }
+
+    public Set<String> getShadowUsedThisRound() {
+        return shadowUsedThisRound;
+    }
+    public void setShadowUsedThisRound(Set<String> shadowUsedThisRound) {
+        this.shadowUsedThisRound = shadowUsedThisRound;
+    }
+
+    public Map<Integer, Set<String>> getShadowDisabledMap() {
+        return shadowDisabledMap;
+    }
+    public void setShadowDisabledMap(Map<Integer, Set<String>> shadowDisabledMap) {
+        this.shadowDisabledMap = shadowDisabledMap;
+    }
 
     /* ---------- 🔥 投票欄位 Getter / Setter ---------- */
     public List<String> getCurrentExpedition() { return currentExpedition; }

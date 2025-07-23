@@ -326,8 +326,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   toggleBtn?.addEventListener("click", () => {
     if (voiceContainer.style.display === "none") {
-      const jitsiRoom = `underground-${roomId}`;
-      voiceIframe.src = `https://meet.jit.si/${encodeURIComponent(jitsiRoom)}#config.startWithAudioMuted=true&config.startWithVideoMuted=true`;
+      const jitsiBase = "https://8x8.vc";
+      const jitsiProject = "underground";
+      const jitsiRoom = `${jitsiProject}/${encodeURIComponent(roomId)}`;
+      voiceIframe.src = `${jitsiBase}/${jitsiRoom}#config.startWithAudioMuted=true&config.startWithVideoMuted=true`;
       voiceContainer.style.display = "block";
       toggleBtn.textContent = "關閉語音";
     } else {

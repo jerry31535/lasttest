@@ -469,19 +469,14 @@ public class RoomController {
         Room room = roomRepository.findById(roomId).orElse(null);
         if (room == null) return ResponseEntity.notFound().build();
 
-        int round = room.getCurrentRound();
-        Set<String> blocked = room.getShadowDisabledMap().getOrDefault(round, new HashSet<>());
         Map<String, RoleInfo> roles = room.getAssignedRoles();
-
         List<String> remainingRoles = new ArrayList<>();
+
         for (String player : roles.keySet()) {
             String role = roles.get(player).getName();
 
             if (isSkillRole(role)) {
-                // ✅ 被封鎖者不加入本回合技能列表
-                if (!blocked.contains(player)) {
-                    remainingRoles.add(role);
-                }
+                remainingRoles.add(role);  // ✅ 一律加進來，不管封鎖與否
             }
         }
 
@@ -587,6 +582,15 @@ public class RoomController {
             return ResponseEntity.status(403).body("該玩家已受到醫護兵保護，潛伏者無法反轉此卡。");
         }
 
+        // ✅ 標記技能已用（無論成功與否）
+        room.getUsedSkillMap().put(playerName, true);
+
+        // ✅ 若被影武者封鎖 → 不反轉卡片，但仍記為已使用
+        if (roomService.isSkillShadowed(room, playerName)) {
+            roomRepository.save(room);
+            return ResponseEntity.ok(Map.of("result", "技能已被封鎖，未反轉任何卡片"));
+        }
+
         // ✅ 反轉卡片內容
         String original = record.getCardMap().get(targetName);
         String toggled = original.equals("SUCCESS") ? "FAIL" : "SUCCESS";
@@ -627,6 +631,21 @@ public class RoomController {
         Set<String> usedThisRound = room.getCommanderUsedThisRound();
         if (usedThisRound.contains(usageKey)) {
             return ResponseEntity.status(403).body("本回合你已查詢過玩家");
+        }
+
+        // ✅ 技能被影武者封鎖 → 技能不產生效果，但消耗次數
+        if (roomService.isSkillShadowed(room, playerName)) {
+            skillCount.put(playerName, used + 1);
+            usedThisRound.add(usageKey);
+
+            room.setCommanderSkillCount(skillCount);
+            room.setCommanderUsedThisRound(usedThisRound);
+            roomRepository.save(room);
+
+            return ResponseEntity.ok(Map.of(
+                "faction", "（技能被封鎖，無法查看）",
+                "remaining", 2 - (used + 1)
+            ));
         }
 
         // ✅ 查詢目標角色陣營
@@ -675,6 +694,14 @@ public class RoomController {
         int used = room.getSaboteurSkillCount().getOrDefault(playerName, 0);
         if (used >= 2) return ResponseEntity.status(403).body("技能已使用 2 次");
 
+        // ✅ 技能被影武者封鎖
+        if (roomService.isSkillShadowed(room, playerName)) {
+            room.getSaboteurSkillCount().put(playerName, used + 1);
+            room.getSaboteurUsedThisRound().add(roundKey);
+            roomRepository.save(room);
+            return ResponseEntity.ok(Map.of("removed", "（被封鎖）", "remaining", 1 - used));
+        }
+
         // ✅ 檢查是否被醫護兵保護
         String protectedPlayer = room.getMedicProtectionMap() != null
             ? room.getMedicProtectionMap().getOrDefault(round, null)
@@ -694,6 +721,7 @@ public class RoomController {
     }
 
 
+
     @PostMapping("/skill/medic-protect")
     public ResponseEntity<?> useMedicSkill(@RequestBody Map<String, String> body) {
         String roomId = body.get("roomId");
@@ -709,10 +737,18 @@ public class RoomController {
 
         int round = room.getCurrentRound();
 
-        room.getMedicProtectionMap().put(round + 1, targetName); // 下一回合才生效
+        // ✅ 技能被影武者封鎖，仍記錄使用，但不保護
         room.getMedicSkillUsed().put(playerName, true);
 
+        if (roomService.isSkillShadowed(room, playerName)) {
+            roomRepository.save(room);
+            return ResponseEntity.ok(Map.of("message", "（被封鎖）技能已使用，但未保護任何人"));
+        }
+
+        // ✅ 實際保護邏輯（下一回合生效）
+        room.getMedicProtectionMap().put(round + 1, targetName);
         roomRepository.save(room);
+
         return ResponseEntity.ok(Map.of("protected", targetName));
     }
 
@@ -726,6 +762,7 @@ public class RoomController {
         if (room == null) return ResponseEntity.notFound().build();
 
         int round = room.getCurrentRound();
+        String roundKey = playerName + "_R" + round;
 
         // ✅ 限回合一次
         if (room.getShadowUsedThisRound().contains(playerName)) {
@@ -745,7 +782,7 @@ public class RoomController {
 
         // ✅ 更新次數與使用紀錄
         room.getShadowSkillCount().put(playerName, used + 1);
-        room.getShadowUsedThisRound().add(playerName);
+        room.getShadowUsedThisRound().add(roundKey);
 
         roomRepository.save(room);
 

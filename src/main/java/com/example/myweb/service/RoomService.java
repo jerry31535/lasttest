@@ -210,6 +210,21 @@ public class RoomService {
         roomRepo.save(room);
         return result;
     }
+
+    public boolean isSkillShadowed(Room room, String playerName) {
+        // 若玩家沒有被影武者鎖定，或封鎖名單為空，就不封鎖
+        if (room.getShadowDisabledMap() == null || room.getShadowDisabledMap().isEmpty()) {
+            return false;
+        }
+
+        // 當前回合
+        int currentRound = room.getCurrentRound();
+        
+        // 檢查該玩家是否在「某回合被封鎖的對象」裡
+       return room.getShadowDisabledMap()
+           .getOrDefault(currentRound, Collections.emptySet())
+           .contains(playerName);
+    }
     
 
 }

@@ -317,8 +317,27 @@ async function fetchMissionSummary() {
 
 
 
-// ✅ 頁面載入後執行主邏輯
 document.addEventListener("DOMContentLoaded", async () => {
+
+  // ✅ Jitsi 語音控制邏輯
+  const voiceContainer = document.getElementById("voice-container");
+  const voiceIframe = document.getElementById("voice-iframe");
+  const toggleBtn = document.getElementById("toggle-voice-btn");
+
+  toggleBtn?.addEventListener("click", () => {
+    if (voiceContainer.style.display === "none") {
+      const jitsiRoom = `underground-${roomId}`;
+      voiceIframe.src = `https://meet.jit.si/${encodeURIComponent(jitsiRoom)}#config.startWithAudioMuted=true&config.startWithVideoMuted=true`;
+      voiceContainer.style.display = "block";
+      toggleBtn.textContent = "關閉語音";
+    } else {
+      voiceContainer.style.display = "none";
+      voiceIframe.src = "";
+      toggleBtn.textContent = "開啟語音";
+    }
+  });
+
+  // ⬇️ 原本的初始化邏輯照常保留
   await fetch(`/api/room/${roomId}/assign-roles`, { method: 'POST' });
 
   try {
@@ -345,59 +364,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.getElementById("select-expedition-btn")?.addEventListener("click", openSelectModal);
   connectWebSocket();
-
-  // ✅ 顯示本回合統計與歷史任務結果
   await fetchMissionSummary();
 });
-// ✅ 語音功能
-let mediaRecorder;
-let voiceSocket;
-let voiceEnabled = false;
 
-function toggleVoice() {
-  if (!voiceEnabled) {
-    startVoice();
-    document.getElementById("toggle-voice-btn").innerText = "🛑 關閉語音";
-    voiceEnabled = true;
-  } else {
-    stopVoice();
-    document.getElementById("toggle-voice-btn").innerText = "🎤 開啟語音";
-    voiceEnabled = false;
-  }
-}
 
-function startVoice() {
-  const username = localStorage.getItem("username") || "guest";
-  voiceSocket = new WebSocket(`ws://${location.host}/voice/${username}`);
-
-  voiceSocket.onopen = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorder = new MediaRecorder(stream);
-    mediaRecorder.ondataavailable = (e) => {
-      if (voiceSocket.readyState === WebSocket.OPEN) {
-        voiceSocket.send(e.data);
-      }
-    };
-    mediaRecorder.start(250);
-    console.log("🎤 語音已啟用");
-  };
-
-  voiceSocket.onmessage = (event) => {
-    const audioBlob = new Blob([event.data], { type: 'audio/webm' });
-    const audioURL = URL.createObjectURL(audioBlob);
-    const audio = new Audio(audioURL);
-    audio.play();
-  };
-
-  voiceSocket.onclose = () => {
-    console.log("🛑 語音 WebSocket 關閉");
-  };
-}
-
-function stopVoice() {
-  if (mediaRecorder) mediaRecorder.stop();
-  if (voiceSocket) voiceSocket.close();
-  console.log("🛑 語音已關閉");
-}
  
 

@@ -318,17 +318,16 @@ async function fetchMissionSummary() {
 
 
 document.addEventListener("DOMContentLoaded", async () => {
-
-  // ✅ Jitsi 語音控制邏輯
+  // ✅ 語音區塊控制
   const voiceContainer = document.getElementById("voice-container");
   const voiceIframe = document.getElementById("voice-iframe");
   const toggleBtn = document.getElementById("toggle-voice-btn");
 
   toggleBtn?.addEventListener("click", () => {
     if (voiceContainer.style.display === "none") {
-      const jitsiBase = "https://8x8.vc";
+      const jitsiBase = "https://meet.jit.si";
       const jitsiProject = "underground";
-      const jitsiRoom = `${jitsiProject}/${encodeURIComponent(roomId)}`;
+      const jitsiRoom = `${jitsiProject}-${roomId}`;
       voiceIframe.src = `${jitsiBase}/${jitsiRoom}#config.startWithAudioMuted=true&config.startWithVideoMuted=true`;
       voiceContainer.style.display = "block";
       toggleBtn.textContent = "關閉語音";
@@ -339,8 +338,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+
   // ⬇️ 原本的初始化邏輯照常保留
-  await fetch(`/api/room/${roomId}/assign-roles`, { method: 'POST' });
+await fetch(`/api/room/${roomId}/assign-roles`, { method: 'POST' });
 
   try {
     const res = await fetch(`/api/room/${roomId}`);
@@ -355,7 +355,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   await fetchPlayers();
   await fetchAssignedRoles();
 
-  const playerName = sessionStorage.getItem("playerName");
   const avatar = sessionStorage.getItem("playerAvatar");
   if (playerName) localStorage.setItem("username", playerName);
   if (avatar) localStorage.setItem("selectedAvatar", avatar);
@@ -368,7 +367,3 @@ document.addEventListener("DOMContentLoaded", async () => {
   connectWebSocket();
   await fetchMissionSummary();
 });
-
-
- 
-
